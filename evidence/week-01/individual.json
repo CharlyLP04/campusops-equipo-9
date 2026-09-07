@@ -1,41 +1,40 @@
 {
-  "_instructions": "Eliminen este campo cuando terminen. Conserven exactamente tres integrantes y usen SHA Git completos de commits creados por cada persona.",
   "schemaVersion": 1,
   "week": 1,
-  "teamId": "REEMPLAZAR_CON_ID_DEL_EQUIPO",
+  "teamId": "equipo-9",
   "members": [
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_1",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
-      "tests": [],
+      "studentId": "Carlos",
+      "commitShas": ["677ed071937de9e13ebbf86e46c71bbfb58c5590"],
+      "files": ["App.tsx", "reports/week-01/baseline.json"],
+      "tests": ["npm run test:smoke"],
       "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "prediction": "Al importar un modulo inexistente en App.tsx el test de humo fallaria con un error de modulo no encontrado, y al revertir la importacion el test volveria a pasar.",
+      "command": "npm run test:smoke",
+      "observedResult": "FAIL course-tests/smoke.test.tsx - Cannot find module 'ningun-lado' from 'App.tsx'. Despues de corregir: PASS course-tests/smoke.test.tsx (1 passed, 1 total).",
+      "explanation": "Node resuelve importaciones estaticas en tiempo de carga del modulo. Al referenciar 'ningun-lado' (modulo que no existe en node_modules ni en el sistema de archivos), Jest lanza un error de resolucion antes de ejecutar cualquier caso de prueba. Revertir la importacion restaura el grafo de dependencias valido y el test pasa normalmente."
     },
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_2",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
+      "studentId": "Alexis",
+      "commitShas": ["9fcb887ac0dff901e34bb0b30bccf799056c6c8e"],
+      "files": ["docs/problem-definition.md"],
       "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "reviews": ["PR #2 revisado y aprobado antes de fusionar a main"],
+      "prediction": "Al agregar la definicion formal del problema y el alcance del proyecto, el repositorio contaria con la base documental necesaria para justificar los requisitos de aceptacion.",
+      "command": "git log --oneline docs/problem-definition.md",
+      "observedResult": "9fcb887 docs: definir problema y alcance de CampusOps - archivo creado y fusionado via PR #2.",
+      "explanation": "La definicion del problema establece el contexto del sistema CampusOps, delimita el alcance funcional y sirve como referencia para los criterios de aceptacion AC-01 a AC-05 que guian las decisiones tecnicas del equipo."
     },
     {
-      "studentId": "REEMPLAZAR_INTEGRANTE_3",
-      "commitShas": ["REEMPLAZAR_CON_SHA_COMPLETO"],
-      "files": ["REEMPLAZAR_CON_ARCHIVO_TRABAJADO"],
+      "studentId": "Pacheco",
+      "commitShas": ["a494b51e9b6b21895ec4bc5676946eb608afdcc2"],
+      "files": ["docs/risk-register.md"],
       "tests": [],
-      "reviews": [],
-      "prediction": "REEMPLAZAR_CON_LO_QUE_ESPERABA_OBSERVAR",
-      "command": "REEMPLAZAR_CON_EL_COMANDO_EJECUTADO",
-      "observedResult": "REEMPLAZAR_CON_LO_QUE_OCURRIO",
-      "explanation": "REEMPLAZAR_CON_LA_EXPLICACION_TECNICA"
+      "reviews": ["PR #3 revisado y aprobado antes de fusionar a main"],
+      "prediction": "Al documentar el registro de riesgos el equipo tendria identificados los principales vectores de falla del proyecto y sus estrategias de mitigacion antes de comenzar el desarrollo.",
+      "command": "git log --oneline docs/risk-register.md",
+      "observedResult": "a494b51 docs: identificar y priorizar riesgos de CampusOps - archivo creado y fusionado via PR #3.",
+      "explanation": "El registro de riesgos prioriza amenazas tecnicas y de proceso (deuda tecnica, falta de cobertura de pruebas, integracion continua inexistente) y propone controles preventivos alineados con la politica de ramas protegidas y revision por pares adoptada por el equipo."
     }
   ]
 }
