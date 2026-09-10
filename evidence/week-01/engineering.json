@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 1,
-  "commitSha": "7b8a663d9570ff18a6032bf79c49176412f17852",
+  "commitSha": "a2460002160dca41c7e0cdd1464c3184395a9c1b",
   "decision": "Bloquear push directos a main y requerir Pull Requests con al menos una aprobacion antes de fusionar cualquier cambio.",
   "alternatives": [
     "Permitir push directos a main para todos los integrantes: mas agil en el corto plazo pero elimina la revision por pares, lo que aumenta la probabilidad de introducir regresiones sin deteccion. Sin historial de PR no existe trazabilidad de quien aprobo cada cambio ni cuando.",
