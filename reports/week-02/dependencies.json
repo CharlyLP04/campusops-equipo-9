@@ -1,0 +1,20 @@
+{
+  "audit": "architecture-boundaries-check",
+  "evaluatedRules": [
+    "UI must not import Infrastructure directly",
+    "Application must depend on Domain repository ports",
+    "Domain must have zero external dependencies"
+  ],
+  "baselineFailure": {
+    "command": "npm test -- course-tests/public/week-02.test.ts",
+    "detectedViolation": "Forbidden direct edge 'ui --> infrastructure' in docs/architecture.mmd AND direct import from src/ui to src/infrastructure in IncidentListScreen.tsx",
+    "exitCode": 1,
+    "observedOutput": "FAIL course-tests/public/week-02.test.ts: expect(received).not.toMatch(expected) — Expected pattern: not /ui\\s*[-.=]+>\\s*infrastructure/ — Boundary violation detected: src/ui directly imports from src/infrastructure AND docs/architecture.mmd contains a direct ui --> infrastructure edge."
+  },
+  "remediatedState": {
+    "command": "npm test -- course-tests/public/week-02.test.ts",
+    "remediationAction": "Removed forbidden edge 'ui --> infrastructure' from docs/architecture.mmd; removed direct infrastructure import from IncidentListScreen.tsx; screen now receives GetIncidentsUseCase via dependency injection through props.",
+    "exitCode": 0,
+    "observedOutput": "PASS course-tests/public/week-02.test.ts: All architecture boundary checks passed successfully. Test Suites: 2 passed, 2 total. Tests: 2 passed, 2 total."
+  }
+}

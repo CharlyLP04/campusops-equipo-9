@@ -1,36 +1,56 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+/**
+ * App.tsx — Raíz de composición (Composition Root)
+ *
+ * Único lugar en el que se instancian:
+ *   - InMemoryIncidentRepository  (Infrastructure)
+ *   - GetIncidentsUseCase         (Application)
+ *   - GetIncidentDetailUseCase    (Application)
+ *
+ * La UI recibe las dependencias inyectadas; nunca importa Infrastructure.
+ */
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
-import { getBackendHealth } from './src/api/courseBackend';
+// Infrastructure — solo se instancia aquí
+import { InMemoryIncidentRepository } from './src/infrastructure/incidents/in-memory-incident.repository';
 
+// Application
+import { GetIncidentsUseCase } from './src/application/incidents/get-incidents.usecase';
+import { GetIncidentDetailUseCase } from './src/application/incidents/get-incident-detail.usecase';
+
+// UI
+import { IncidentListScreen } from './src/ui/screens/IncidentListScreen';
+import { IncidentDetailScreen } from './src/ui/screens/IncidentDetailScreen';
+
+// ─── Composition Root ─────────────────────────────────────────────────────────
+const repository = new InMemoryIncidentRepository();
+const getIncidentsUseCase = new GetIncidentsUseCase(repository);
+const getIncidentDetailUseCase = new GetIncidentDetailUseCase(repository);
+
+// ─── Navegación simple ────────────────────────────────────────────────────────
 export default function App() {
-  const [status, setStatus] = useState<'checking' | 'available' | 'offline'>('checking');
-
-  useEffect(() => {
-    let active = true;
-    getBackendHealth()
-      .then(() => active && setStatus('available'))
-      .catch(() => active && setStatus('offline'));
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
 
   return (
-    <View style={styles.screen}>
-      <View accessibilityRole="summary" style={styles.card}>
-        <Text style={styles.title}>CampusOps</Text>
-        <Text>Incidencias del campus · entorno académico ficticio</Text>
-        <Text testID="backend-status">Backend: {status}</Text>
-      </View>
-      <StatusBar style="auto" />
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      {selectedIncidentId === null ? (
+        <IncidentListScreen
+          getIncidentsUseCase={getIncidentsUseCase}
+          onSelectIncident={(id) => setSelectedIncidentId(id)}
+        />
+      ) : (
+        <IncidentDetailScreen
+          incidentId={selectedIncidentId}
+          getIncidentDetailUseCase={getIncidentDetailUseCase}
+          onBack={() => setSelectedIncidentId(null)}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, justifyContent: 'center', padding: 24 },
-  card: { gap: 12, padding: 20 },
-  title: { fontSize: 24, fontWeight: '700' },
+  root: { flex: 1 },
 });
