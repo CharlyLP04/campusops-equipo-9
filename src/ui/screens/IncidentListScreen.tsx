@@ -17,13 +17,22 @@ import { GetIncidentsUseCase } from '../../application/incidents/get-incidents.u
 import { Incident, IncidentStatus } from '../../domain/incidents/incident.entity';
 
 // ─── Paleta de colores por estado oficial ────────────────────────────────────
-const STATUS_COLORS: Record<IncidentStatus, { bg: string; text: string }> = {
-  Reportada:        { bg: '#FFF3CD', text: '#856404' },
-  Asignada:         { bg: '#CCE5FF', text: '#004085' },
-  'En proceso':     { bg: '#D4EDDA', text: '#155724' },
-  'En verificación': { bg: '#D1ECF1', text: '#0C5460' },
-  Cerrada:          { bg: '#E2E3E5', text: '#383D41' },
+type BadgeColor = { bg: string; text: string };
+
+const STATUS_COLORS: Record<IncidentStatus, BadgeColor> = {
+  Reportada:          { bg: '#FFF3CD', text: '#856404' },
+  Asignada:           { bg: '#CCE5FF', text: '#004085' },
+  'En proceso':       { bg: '#D4EDDA', text: '#155724' },
+  'En verificación':  { bg: '#D1ECF1', text: '#0C5460' },
+  Cerrada:            { bg: '#E2E3E5', text: '#383D41' },
 };
+
+const FALLBACK_BADGE: BadgeColor = { bg: '#F3F4F6', text: '#374151' };
+
+/** Devuelve siempre un BadgeColor válido; nunca undefined. */
+function getBadgeColor(status: IncidentStatus): BadgeColor {
+  return STATUS_COLORS[status] ?? FALLBACK_BADGE;
+}
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface IncidentListScreenProps {
@@ -37,7 +46,7 @@ export function IncidentListScreen({
   onSelectIncident,
 }: IncidentListScreenProps) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     let active = true;
@@ -60,7 +69,7 @@ export function IncidentListScreen({
 
   const renderItem = useCallback(
     ({ item }: { item: Incident }) => {
-      const badgeColors = STATUS_COLORS[item.status];
+      const badgeColors: BadgeColor = getBadgeColor(item.status);
       return (
         <TouchableOpacity
           testID={`incident-item-${item.id}`}

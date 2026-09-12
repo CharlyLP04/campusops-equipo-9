@@ -17,13 +17,26 @@ import { GetIncidentDetailUseCase } from '../../application/incidents/get-incide
 import { Incident, IncidentStatus } from '../../domain/incidents/incident.entity';
 
 // ─── Paleta de colores por estado oficial ────────────────────────────────────
-const STATUS_COLORS: Record<IncidentStatus, { bg: string; text: string; border: string }> = {
-  Reportada:        { bg: '#FFF3CD', text: '#856404', border: '#FFEEBA' },
-  Asignada:         { bg: '#CCE5FF', text: '#004085', border: '#B8DAFF' },
-  'En proceso':     { bg: '#D4EDDA', text: '#155724', border: '#C3E6CB' },
-  'En verificación': { bg: '#D1ECF1', text: '#0C5460', border: '#BEE5EB' },
-  Cerrada:          { bg: '#E2E3E5', text: '#383D41', border: '#D6D8DB' },
+type StatusColor = { bg: string; text: string; border: string };
+
+const STATUS_COLORS: Record<IncidentStatus, StatusColor> = {
+  Reportada:          { bg: '#FFF3CD', text: '#856404', border: '#FFEEBA' },
+  Asignada:           { bg: '#CCE5FF', text: '#004085', border: '#B8DAFF' },
+  'En proceso':       { bg: '#D4EDDA', text: '#155724', border: '#C3E6CB' },
+  'En verificación':  { bg: '#D1ECF1', text: '#0C5460', border: '#BEE5EB' },
+  Cerrada:            { bg: '#E2E3E5', text: '#383D41', border: '#D6D8DB' },
 };
+
+const FALLBACK_COLOR: StatusColor = {
+  bg: '#F3F4F6',
+  text: '#374151',
+  border: '#E5E7EB',
+};
+
+/** Devuelve siempre un StatusColor válido; nunca undefined. */
+function getStatusColor(status: IncidentStatus): StatusColor {
+  return STATUS_COLORS[status] ?? FALLBACK_COLOR;
+}
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface IncidentDetailScreenProps {
@@ -60,8 +73,8 @@ export function IncidentDetailScreen({
   onBack,
 }: IncidentDetailScreenProps) {
   const [incident, setIncident] = useState<Incident | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [notFound, setNotFound] = useState<boolean>(false);
 
   useEffect(() => {
     let active = true;
@@ -70,7 +83,7 @@ export function IncidentDetailScreen({
       .execute(incidentId)
       .then((data) => {
         if (!active) return;
-        if (data) {
+        if (data != null) {
           setIncident(data);
         } else {
           setNotFound(true);
@@ -87,6 +100,11 @@ export function IncidentDetailScreen({
       active = false;
     };
   }, [incidentId, getIncidentDetailUseCase]);
+
+  // ── Extrae el color de estado de forma segura (antes del JSX) ──────────────
+  // Si incident es null, statusColor no se usa — el render nunca llega a esa rama.
+  const statusColor: StatusColor =
+    incident != null ? getStatusColor(incident.status) : FALLBACK_COLOR;
 
   return (
     <View style={styles.container}>
@@ -106,13 +124,14 @@ export function IncidentDetailScreen({
         <View style={styles.navPlaceholder} />
       </View>
 
-      {/* Contenido */}
+      {/* Estado: cargando */}
       {loading && (
         <View style={styles.centered}>
           <ActivityIndicator testID="detail-loading" size="large" color="#4F46E5" />
         </View>
       )}
 
+      {/* Estado: no encontrado */}
       {!loading && notFound && (
         <View style={styles.centered}>
           <Text style={styles.notFoundText}>Incidencia no encontrada.</Text>
@@ -122,22 +141,23 @@ export function IncidentDetailScreen({
         </View>
       )}
 
-      {!loading && incident && (
+      {/* Estado: datos disponibles */}
+      {!loading && incident != null && (
         <ScrollView contentContainerStyle={styles.content}>
-          {/* Cabecera de estado */}
+          {/* Badge de estado — usa statusColor extraído fuera del JSX */}
           <View
             style={[
               styles.statusBanner,
               {
-                backgroundColor: STATUS_COLORS[incident.status].bg,
-                borderColor: STATUS_COLORS[incident.status].border,
+                backgroundColor: statusColor.bg,
+                borderColor: statusColor.border,
               },
             ]}
           >
             <Text
               style={[
                 styles.statusBannerText,
-                { color: STATUS_COLORS[incident.status].text },
+                { color: statusColor.text },
               ]}
             >
               {incident.status}
@@ -165,10 +185,13 @@ export function IncidentDetailScreen({
               <InfoRow label="Estado" value={incident.status} />
               <View style={styles.divider} />
               <InfoRow label="Reportado por" value={incident.reportedBy} />
-              {incident.assignedTo && (
+              {incident.assignedTo != null && (
                 <>
                   <View style={styles.divider} />
-                  <InfoRow label="Asignado a" value={incident.assignedTo} />
+                  <InfoRow
+                    label="Asignado a"
+                    value={incident.assignedTo}
+                  />
                 </>
               )}
             </View>
@@ -178,9 +201,15 @@ export function IncidentDetailScreen({
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Fechas</Text>
             <View style={styles.infoCard}>
-              <InfoRow label="Reportada" value={formatDate(incident.reportedAt)} />
+              <InfoRow
+                label="Reportada"
+                value={formatDate(incident.reportedAt)}
+              />
               <View style={styles.divider} />
-              <InfoRow label="Última actualización" value={formatDate(incident.updatedAt)} />
+              <InfoRow
+                label="Última actualización"
+                value={formatDate(incident.updatedAt)}
+              />
             </View>
           </View>
 
