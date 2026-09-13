@@ -1,0 +1,38 @@
+{
+  "week": "02",
+  "theme": "Arquitectura justificable",
+  "decision": "Arquitectura en capas: UI → Application → Domain ← Infrastructure",
+  "requirement": "El código debe ser testeable de forma aislada y permitir reemplazar proveedores sin modificar la lógica de negocio.",
+  "alternatives": [
+    {
+      "name": "Arquitectura en capas (UI → Application → Domain ← Infrastructure)",
+      "selected": true,
+      "benefits": [
+        "Casos de uso testeables como clases TypeScript puras, sin emulador",
+        "Cambiar proveedor de persistencia solo requiere una nueva clase en Infrastructure",
+        "Límites de capas verificables automáticamente mediante análisis de imports"
+      ],
+      "costs": [
+        "Mayor número de archivos por feature (entidad, puerto, caso de uso, adaptador)",
+        "Requiere disciplina del equipo para no cruzar límites de capa"
+      ]
+    },
+    {
+      "name": "Arquitectura plana con hooks de React (lógica en UI hooks)",
+      "selected": false,
+      "benefits": [
+        "Menos archivos iniciales",
+        "Curva de aprendizaje menor para desarrolladores nuevos en React"
+      ],
+      "costs": [
+        "Lógica de negocio acoplada a React; difícil de probar con Jest puro",
+        "Cambiar proveedor de datos obliga a modificar hooks y tests de UI",
+        "Escala mal al aumentar el número de features"
+      ]
+    }
+  ],
+  "tradeoff": "Se prioriza la facilidad de prueba automatizada sobre la velocidad de escritura inicial. El costo de boilerplate estructural es aceptable dado el tamaño del equipo (3 personas) y los requisitos de evaluación.",
+  "relatedTest": "course-tests/public/week-02.test.ts",
+  "testResult": "PASS — Todas las verificaciones de límites de arquitectura pasaron correctamente.",
+  "testCommand": "npm test -- course-tests/public/week-02.test.ts"
+}

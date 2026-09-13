@@ -1,0 +1,58 @@
+{
+  "week": "02",
+  "theme": "Arquitectura justificable",
+  "contributors": [
+    {
+      "name": "Carlos Olaya Gutiérrez",
+      "id": "3523110786",
+      "role": "Desarrollador individual",
+      "contributions": [
+        {
+          "file": "src/domain/incidents/incident.entity.ts",
+          "description": "Definición de la entidad Incident con los 5 estados oficiales del ciclo de vida de CampusOps y los tipos IncidentCategory y CampusRole."
+        },
+        {
+          "file": "src/domain/incidents/incident-repository.port.ts",
+          "description": "Puerto abstracto IncidentRepository con métodos findAll() y findById(). Establece el contrato del que dependen los casos de uso (Dependency Inversion)."
+        },
+        {
+          "file": "src/application/incidents/get-incidents.usecase.ts",
+          "description": "Caso de uso GetIncidentsUseCase. Recibe IncidentRepository en constructor y delega findAll(). Testeable de forma aislada sin React ni emulador."
+        },
+        {
+          "file": "src/application/incidents/get-incident-detail.usecase.ts",
+          "description": "Caso de uso GetIncidentDetailUseCase. Recibe IncidentRepository en constructor y delega findById(id)."
+        },
+        {
+          "file": "src/infrastructure/incidents/in-memory-incident.repository.ts",
+          "description": "Implementación concreta InMemoryIncidentRepository con 5 incidencias sintéticas que cubren los 5 estados oficiales. Solo se instancia en App.tsx (Composition Root)."
+        },
+        {
+          "file": "src/ui/screens/IncidentListScreen.tsx",
+          "description": "Componente funcional con FlatList, badges de estado con paleta de colores diferenciada por estado oficial. Props inyectadas; cero imports de Infrastructure (verificado en AC-03)."
+        },
+        {
+          "file": "src/ui/screens/IncidentDetailScreen.tsx",
+          "description": "Componente funcional con ScrollView mostrando título, descripción, zona, categoría, estado, fechas y botón Volver. Props inyectadas."
+        },
+        {
+          "file": "App.tsx",
+          "description": "Raíz de composición: único punto de instanciación del repositorio y los casos de uso. Maneja selectedIncidentId para alternar entre pantallas sin navigator externo."
+        },
+        {
+          "file": "docs/architecture.mmd",
+          "description": "Diagrama Mermaid con los 4 límites (UI, Application, Domain, Infrastructure), dependencias dirigidas y roles de usuario. Verificado por course-tests/public/week-02.test.ts."
+        },
+        {
+          "file": "docs/adr/ADR-001-architecture.md",
+          "description": "ADR comparando Alternativa 1 (capas) vs Alternativa 2 (hooks planos). Documenta la decisión, consecuencias y trade-offs."
+        },
+        {
+          "file": "reports/week-02/dependencies.json",
+          "description": "Reporte del experimento AC-03: falla controlada (ui-->infrastructure en el diagrama + import prohibido en TS), detección con exit code 1, remediación y estado limpio con exit code 0."
+        }
+      ],
+      "technicalSignal": "Implementó el esqueleto completo de arquitectura en capas: dominio, aplicación, infraestructura y UI. Ejecutó y documentó el experimento de límites AC-03 verificable con comandos reales."
+    }
+  ]
+}
