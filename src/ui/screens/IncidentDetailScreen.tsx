@@ -78,7 +78,6 @@ export function IncidentDetailScreen({
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     getIncidentDetailUseCase
       .execute(incidentId)
       .then((data) => {

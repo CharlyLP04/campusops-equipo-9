@@ -50,7 +50,6 @@ export function IncidentListScreen({
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     getIncidentsUseCase
       .execute()
       .then((data) => {
