@@ -1,5 +1,5 @@
-import { Incident } from '../../domain/incidents/incident.entity';
-import { IncidentRepository } from '../../domain/incidents/incident-repository.port';
+import type { Incident } from '../../domain/incidents/incident.entity';
+import type { IncidentRepository } from '../../domain/incidents/incident-repository.port';
 
 /**
  * Caso de uso: Obtener la lista completa de incidencias.
@@ -8,7 +8,7 @@ import { IncidentRepository } from '../../domain/incidents/incident-repository.p
 export class GetIncidentsUseCase {
   constructor(private readonly repository: IncidentRepository) {}
 
-  async execute(): Promise<Incident[]> {
+  async execute(): Promise<readonly Incident[]> {
     return this.repository.findAll();
   }
 }

@@ -14,17 +14,22 @@ import {
 } from 'react-native';
 
 import { GetIncidentsUseCase } from '../../application/incidents/get-incidents.usecase';
-import { Incident, IncidentStatus } from '../../domain/incidents/incident.entity';
+import {
+  INCIDENT_CATEGORY_LABELS,
+  INCIDENT_STATUS_LABELS,
+  Incident,
+  IncidentStatus,
+} from '../../domain/incidents/incident.entity';
 
 // ─── Paleta de colores por estado oficial ────────────────────────────────────
 type BadgeColor = { bg: string; text: string };
 
 const STATUS_COLORS: Record<IncidentStatus, BadgeColor> = {
-  Reportada:          { bg: '#FFF3CD', text: '#856404' },
-  Asignada:           { bg: '#CCE5FF', text: '#004085' },
-  'En proceso':       { bg: '#D4EDDA', text: '#155724' },
-  'En verificación':  { bg: '#D1ECF1', text: '#0C5460' },
-  Cerrada:            { bg: '#E2E3E5', text: '#383D41' },
+  open:        { bg: '#FFF3CD', text: '#856404' },
+  assigned:    { bg: '#CCE5FF', text: '#004085' },
+  in_progress: { bg: '#D4EDDA', text: '#155724' },
+  resolved:    { bg: '#D1ECF1', text: '#0C5460' },
+  closed:      { bg: '#E2E3E5', text: '#383D41' },
 };
 
 const FALLBACK_BADGE: BadgeColor = { bg: '#F3F4F6', text: '#374151' };
@@ -45,7 +50,7 @@ export function IncidentListScreen({
   getIncidentsUseCase,
   onSelectIncident,
 }: IncidentListScreenProps) {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidents, setIncidents] = useState<readonly Incident[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -69,6 +74,10 @@ export function IncidentListScreen({
   const renderItem = useCallback(
     ({ item }: { item: Incident }) => {
       const badgeColors: BadgeColor = getBadgeColor(item.status);
+      const statusLabel = INCIDENT_STATUS_LABELS[item.status] ?? item.status;
+      const categoryLabel =
+        INCIDENT_CATEGORY_LABELS[item.category] ?? item.category;
+
       return (
         <TouchableOpacity
           testID={`incident-item-${item.id}`}
@@ -83,16 +92,16 @@ export function IncidentListScreen({
               style={[styles.badge, { backgroundColor: badgeColors.bg }]}
             >
               <Text style={[styles.badgeText, { color: badgeColors.text }]}>
-                {item.status}
+                {statusLabel}
               </Text>
             </View>
           </View>
           <Text style={styles.cardTitle} numberOfLines={2}>
-            {item.title}
+            {item.description}
           </Text>
           <View style={styles.cardMeta}>
-            <Text style={styles.metaText}>📍 {item.zone}</Text>
-            <Text style={styles.metaText}>🏷 {item.category}</Text>
+            <Text style={styles.metaText}>📍 {item.location.label}</Text>
+            <Text style={styles.metaText}>🏷 {categoryLabel}</Text>
           </View>
         </TouchableOpacity>
       );
@@ -203,7 +212,8 @@ const styles = StyleSheet.create({
   },
   cardMeta: {
     flexDirection: 'row',
-    gap: 16,
+    flexWrap: 'wrap',
+    gap: 12,
   },
   metaText: {
     fontSize: 12,

@@ -1,42 +1,33 @@
-graph TD
-    subgraph ui["UI (Presentación)"]
-        A[IncidentListScreen]
-        B[IncidentDetailScreen]
+flowchart TB
+    subgraph Perfiles
+        R[Reportante]
+        T[Técnico]
+        C[Coordinador]
     end
 
-    subgraph application["Application (Casos de uso)"]
-        C[GetIncidentsUseCase]
-        D[GetIncidentDetailUseCase]
+    subgraph Capas
+        UI[UI]
+        APP[Application]
+        DOM[Domain]
+        INF[Infrastructure]
     end
 
-    subgraph domain["Domain (Entidades y Puertos)"]
-        E[Incident entity]
-        F[IncidentRepository port]
+    subgraph Limites
+        INC[Incidencias]
+        SES[Sesión]
+        PER[Persistencia]
+        UBI[Ubicación]
     end
 
-    subgraph infrastructure["Infrastructure (Adaptadores)"]
-        G[InMemoryIncidentRepository]
-        H[CourseBackend API adapter]
-    end
+    R --> UI
+    T --> UI
+    C --> UI
 
-    A --> C
-    B --> D
-    C --> F
-    D --> F
-    F --> E
-    G --> F
-    H --> F
+    UI --> APP
+    APP --> DOM
+    INF --> DOM
 
-    %% Roles de usuario
-    subgraph roles["Roles (Actores)"]
-        R1[Reportante]
-        R2[Técnico]
-        R3[Coordinador]
-    end
-
-    R1 --> A
-    R2 --> B
-    R3 --> B
-
-    %% REGLA: La capa UI nunca depende directamente de Infrastructure.
-    %% Toda comunicación pasa por Application y el puerto del Domain.
+    APP --> INC
+    APP --> SES
+    INF --> PER
+    INF --> UBI

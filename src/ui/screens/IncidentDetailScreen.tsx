@@ -14,17 +14,22 @@ import {
 } from 'react-native';
 
 import { GetIncidentDetailUseCase } from '../../application/incidents/get-incident-detail.usecase';
-import { Incident, IncidentStatus } from '../../domain/incidents/incident.entity';
+import {
+  INCIDENT_CATEGORY_LABELS,
+  INCIDENT_STATUS_LABELS,
+  Incident,
+  IncidentStatus,
+} from '../../domain/incidents/incident.entity';
 
 // ─── Paleta de colores por estado oficial ────────────────────────────────────
 type StatusColor = { bg: string; text: string; border: string };
 
 const STATUS_COLORS: Record<IncidentStatus, StatusColor> = {
-  Reportada:          { bg: '#FFF3CD', text: '#856404', border: '#FFEEBA' },
-  Asignada:           { bg: '#CCE5FF', text: '#004085', border: '#B8DAFF' },
-  'En proceso':       { bg: '#D4EDDA', text: '#155724', border: '#C3E6CB' },
-  'En verificación':  { bg: '#D1ECF1', text: '#0C5460', border: '#BEE5EB' },
-  Cerrada:            { bg: '#E2E3E5', text: '#383D41', border: '#D6D8DB' },
+  open:        { bg: '#FFF3CD', text: '#856404', border: '#FFEEBA' },
+  assigned:    { bg: '#CCE5FF', text: '#004085', border: '#B8DAFF' },
+  in_progress: { bg: '#D4EDDA', text: '#155724', border: '#C3E6CB' },
+  resolved:    { bg: '#D1ECF1', text: '#0C5460', border: '#BEE5EB' },
+  closed:      { bg: '#E2E3E5', text: '#383D41', border: '#D6D8DB' },
 };
 
 const FALLBACK_COLOR: StatusColor = {
@@ -43,18 +48,6 @@ interface IncidentDetailScreenProps {
   incidentId: string;
   getIncidentDetailUseCase: GetIncidentDetailUseCase;
   onBack: () => void;
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString('es-MX', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
-  } catch {
-    return iso;
-  }
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -100,10 +93,16 @@ export function IncidentDetailScreen({
     };
   }, [incidentId, getIncidentDetailUseCase]);
 
-  // ── Extrae el color de estado de forma segura (antes del JSX) ──────────────
-  // Si incident es null, statusColor no se usa — el render nunca llega a esa rama.
   const statusColor: StatusColor =
     incident != null ? getStatusColor(incident.status) : FALLBACK_COLOR;
+  const statusLabel =
+    incident != null
+      ? INCIDENT_STATUS_LABELS[incident.status] ?? incident.status
+      : '';
+  const categoryLabel =
+    incident != null
+      ? INCIDENT_CATEGORY_LABELS[incident.category] ?? incident.category
+      : '';
 
   return (
     <View style={styles.container}>
@@ -143,7 +142,7 @@ export function IncidentDetailScreen({
       {/* Estado: datos disponibles */}
       {!loading && incident != null && (
         <ScrollView contentContainerStyle={styles.content}>
-          {/* Badge de estado — usa statusColor extraído fuera del JSX */}
+          {/* Badge de estado */}
           <View
             style={[
               styles.statusBanner,
@@ -159,13 +158,12 @@ export function IncidentDetailScreen({
                 { color: statusColor.text },
               ]}
             >
-              {incident.status}
+              {statusLabel}
             </Text>
           </View>
 
-          {/* ID + Título */}
+          {/* ID */}
           <Text style={styles.incidentId}>{incident.id}</Text>
-          <Text style={styles.incidentTitle}>{incident.title}</Text>
 
           {/* Descripción */}
           <View style={styles.section}>
@@ -173,41 +171,23 @@ export function IncidentDetailScreen({
             <Text style={styles.description}>{incident.description}</Text>
           </View>
 
-          {/* Detalles */}
+          {/* Información */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Información</Text>
             <View style={styles.infoCard}>
-              <InfoRow label="Zona" value={incident.zone} />
+              <InfoRow label="Ubicación" value={incident.location.label} />
               <View style={styles.divider} />
-              <InfoRow label="Categoría" value={incident.category} />
+              <InfoRow label="Origen de ubicación" value={incident.location.source} />
               <View style={styles.divider} />
-              <InfoRow label="Estado" value={incident.status} />
+              <InfoRow label="Categoría" value={categoryLabel} />
               <View style={styles.divider} />
-              <InfoRow label="Reportado por" value={incident.reportedBy} />
-              {incident.assignedTo != null && (
-                <>
-                  <View style={styles.divider} />
-                  <InfoRow
-                    label="Asignado a"
-                    value={incident.assignedTo}
-                  />
-                </>
-              )}
-            </View>
-          </View>
-
-          {/* Fechas */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Fechas</Text>
-            <View style={styles.infoCard}>
-              <InfoRow
-                label="Reportada"
-                value={formatDate(incident.reportedAt)}
-              />
+              <InfoRow label="Estado" value={statusLabel} />
+              <View style={styles.divider} />
+              <InfoRow label="Reportado por" value={incident.reporterId} />
               <View style={styles.divider} />
               <InfoRow
-                label="Última actualización"
-                value={formatDate(incident.updatedAt)}
+                label="Técnico asignado"
+                value={incident.assignedTechnicianId ?? 'Sin asignar'}
               />
             </View>
           </View>
@@ -294,14 +274,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#6B7280',
     letterSpacing: 1,
-    marginBottom: 6,
-  },
-  incidentTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 20,
-    lineHeight: 28,
+    marginBottom: 12,
   },
   section: {
     marginBottom: 20,

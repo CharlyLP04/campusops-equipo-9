@@ -1,34 +1,62 @@
 /**
- * Entidad de dominio: Incidencia.
- * Soporta los 5 estados del ciclo de vida institucional de CampusOps.
+ * Vocabulario del dominio de incidencias. Los identificadores permanecen
+ * estables para los contratos; las etiquetas se presentan en español.
  */
 export type IncidentStatus =
-  | 'Reportada'
-  | 'Asignada'
-  | 'En proceso'
-  | 'En verificación'
-  | 'Cerrada';
+  | 'open'
+  | 'assigned'
+  | 'in_progress'
+  | 'resolved'
+  | 'closed';
+
+export const INCIDENT_STATUS_LABELS: Readonly<Record<IncidentStatus, string>> = {
+  open: 'Reportada',
+  assigned: 'Asignada',
+  in_progress: 'En proceso',
+  resolved: 'En verificación',
+  closed: 'Cerrada',
+};
+
+export type CampusRole = 'reporter' | 'technician' | 'coordinator';
+
+export const CAMPUS_ROLE_LABELS: Readonly<Record<CampusRole, string>> = {
+  reporter: 'Reportante',
+  technician: 'Técnico',
+  coordinator: 'Coordinador',
+};
 
 export type IncidentCategory =
-  | 'Eléctrico'
-  | 'Laboratorio'
-  | 'Agua'
-  | 'Conectividad'
-  | 'Equipamiento'
-  | 'Seguridad'
-  | 'Mantenimiento';
+  | 'electrical'
+  | 'laboratory'
+  | 'water'
+  | 'connectivity'
+  | 'equipment'
+  | 'safety'
+  | 'maintenance';
 
-export type CampusRole = 'Reportante' | 'Técnico' | 'Coordinador';
+export const INCIDENT_CATEGORY_LABELS: Readonly<Record<IncidentCategory, string>> = {
+  electrical: 'Eléctrico',
+  laboratory: 'Laboratorio',
+  water: 'Agua',
+  connectivity: 'Conectividad',
+  equipment: 'Equipamiento',
+  safety: 'Seguridad',
+  maintenance: 'Mantenimiento',
+};
 
-export interface Incident {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  readonly zone: string;
-  readonly category: IncidentCategory;
-  readonly status: IncidentStatus;
-  readonly reportedAt: string;  // ISO date string
-  readonly updatedAt: string;   // ISO date string
-  readonly reportedBy: string;  // actor id
-  readonly assignedTo: string | null;
-}
+export type IncidentLocation = Readonly<{
+  source: 'provider' | 'manual';
+  label: string;
+  latitude?: number;
+  longitude?: number;
+}>;
+
+export type Incident = Readonly<{
+  id: string;
+  reporterId: string;
+  category: IncidentCategory;
+  description: string;
+  location: IncidentLocation;
+  assignedTechnicianId: string | null;
+  status: IncidentStatus;
+}>;
