@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph Perfiles
+        R[Reportante]
+        T[Técnico]
+        C[Coordinador]
+    end
+
+    subgraph Capas
+        UI[UI]
+        APP[Application]
+        DOM[Domain]
+        INF[Infrastructure]
+    end
+
+    subgraph Limites
+        INC[Incidencias]
+        SES[Sesión]
+        PER[Persistencia]
+        UBI[Ubicación]
+    end
+
+    R --> UI
+    T --> UI
+    C --> UI
+
+    UI --> APP
+    APP --> DOM
+    INF --> DOM
+
+    APP --> INC
+    APP --> SES
+    INF --> PER
+    INF --> UBI
