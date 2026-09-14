@@ -38,6 +38,15 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
     assignedTechnicianId: 'technician-001',
     status: 'closed',
   },
+  {
+    id: 'incident-005',
+    reporterId: 'reporter-005',
+    category: 'safety',
+    description: 'Puerta de emergencia trabada en edificio de gobierno.',
+    location: { source: 'manual', label: 'Edificio de gobierno, planta baja' },
+    assignedTechnicianId: 'technician-003',
+    status: 'assigned',
+  },
 ];
 
 export class InMemoryIncidentRepository implements IncidentRepositoryPort {

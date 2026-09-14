@@ -34,6 +34,16 @@ export type IncidentCategory =
   | 'safety'
   | 'maintenance';
 
+export const INCIDENT_CATEGORY_LABELS: Readonly<Record<IncidentCategory, string>> = {
+  electrical: 'Eléctrico',
+  laboratory: 'Laboratorio',
+  water: 'Agua',
+  connectivity: 'Conectividad',
+  equipment: 'Equipamiento',
+  safety: 'Seguridad',
+  maintenance: 'Mantenimiento',
+};
+
 export type IncidentLocation = Readonly<{
   source: 'provider' | 'manual';
   label: string;
