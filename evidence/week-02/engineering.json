@@ -1,38 +1,25 @@
 {
-  "week": "02",
-  "theme": "Arquitectura justificable",
-  "decision": "Arquitectura en capas: UI → Application → Domain ← Infrastructure",
-  "requirement": "El código debe ser testeable de forma aislada y permitir reemplazar proveedores sin modificar la lógica de negocio.",
+  "schemaVersion": 1,
+  "week": 2,
+  "commitSha": "f36c1fe819305db199f872ae37e74de9da95ae4b",
+  "decision": "Se adopta la arquitectura basada en Puertos y Adaptadores con cuatro capas estrictas: UI -> Application -> Domain <- Infrastructure.",
   "alternatives": [
-    {
-      "name": "Arquitectura en capas (UI → Application → Domain ← Infrastructure)",
-      "selected": true,
-      "benefits": [
-        "Casos de uso testeables como clases TypeScript puras, sin emulador",
-        "Cambiar proveedor de persistencia solo requiere una nueva clase en Infrastructure",
-        "Límites de capas verificables automáticamente mediante análisis de imports"
-      ],
-      "costs": [
-        "Mayor número de archivos por feature (entidad, puerto, caso de uso, adaptador)",
-        "Requiere disciplina del equipo para no cruzar límites de capa"
-      ]
-    },
-    {
-      "name": "Arquitectura plana con hooks de React (lógica en UI hooks)",
-      "selected": false,
-      "benefits": [
-        "Menos archivos iniciales",
-        "Curva de aprendizaje menor para desarrolladores nuevos en React"
-      ],
-      "costs": [
-        "Lógica de negocio acoplada a React; difícil de probar con Jest puro",
-        "Cambiar proveedor de datos obliga a modificar hooks y tests de UI",
-        "Escala mal al aumentar el número de features"
-      ]
-    }
+    "Alternativa A: UI con servicios directos y llamadas acopladas en componentes de React Native, reduciendo archivos iniciales pero dificultando las pruebas y el cambio de persistencia.",
+    "Alternativa B: Puertos y Adaptadores con Capas Limpias (UI -> Application -> Domain <- Infrastructure), desacoplando persistencia mediante contratos e inyeccion de dependencias."
   ],
-  "tradeoff": "Se prioriza la facilidad de prueba automatizada sobre la velocidad de escritura inicial. El costo de boilerplate estructural es aceptable dado el tamaño del equipo (3 personas) y los requisitos de evaluación.",
-  "relatedTest": "course-tests/public/week-02.test.ts",
-  "testResult": "PASS — Todas las verificaciones de límites de arquitectura pasaron correctamente.",
-  "testCommand": "npm test -- course-tests/public/week-02.test.ts"
+  "tradeoff": "Beneficio: los casos de uso y la logica de negocio son testeables de forma aislada sin emulador ni bundler, y cambiar el proveedor de persistencia no afecta a la UI. Costo: mayor cantidad de archivos iniciales (puertos, entidades, adaptadores) y disciplina requerida para no violar los limites entre capas.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/public/week-02.test.ts",
+      "result": "PASS course-tests/public/week-02.test.ts — verifica limites arquitectonicos y ausencia de dependencias directas de UI hacia Infrastructure.",
+      "evidence": "reports/week-02/dependencies.json — evidencia de la falla controlada remediada y cumplimiento de reglas de limites de capas."
+    }
+  ]
 }

@@ -1,58 +1,73 @@
 {
-  "week": "02",
-  "theme": "Arquitectura justificable",
-  "contributors": [
+  "schemaVersion": 1,
+  "week": 2,
+  "teamId": "equipo-9",
+  "members": [
     {
-      "name": "Carlos Olaya Gutiérrez",
-      "id": "3523110786",
-      "role": "Desarrollador individual",
-      "contributions": [
-        {
-          "file": "src/domain/incidents/incident.entity.ts",
-          "description": "Definición de la entidad Incident con los 5 estados oficiales del ciclo de vida de CampusOps y los tipos IncidentCategory y CampusRole."
-        },
-        {
-          "file": "src/domain/incidents/incident-repository.port.ts",
-          "description": "Puerto abstracto IncidentRepository con métodos findAll() y findById(). Establece el contrato del que dependen los casos de uso (Dependency Inversion)."
-        },
-        {
-          "file": "src/application/incidents/get-incidents.usecase.ts",
-          "description": "Caso de uso GetIncidentsUseCase. Recibe IncidentRepository en constructor y delega findAll(). Testeable de forma aislada sin React ni emulador."
-        },
-        {
-          "file": "src/application/incidents/get-incident-detail.usecase.ts",
-          "description": "Caso de uso GetIncidentDetailUseCase. Recibe IncidentRepository en constructor y delega findById(id)."
-        },
-        {
-          "file": "src/infrastructure/incidents/in-memory-incident.repository.ts",
-          "description": "Implementación concreta InMemoryIncidentRepository con 5 incidencias sintéticas que cubren los 5 estados oficiales. Solo se instancia en App.tsx (Composition Root)."
-        },
-        {
-          "file": "src/ui/screens/IncidentListScreen.tsx",
-          "description": "Componente funcional con FlatList, badges de estado con paleta de colores diferenciada por estado oficial. Props inyectadas; cero imports de Infrastructure (verificado en AC-03)."
-        },
-        {
-          "file": "src/ui/screens/IncidentDetailScreen.tsx",
-          "description": "Componente funcional con ScrollView mostrando título, descripción, zona, categoría, estado, fechas y botón Volver. Props inyectadas."
-        },
-        {
-          "file": "App.tsx",
-          "description": "Raíz de composición: único punto de instanciación del repositorio y los casos de uso. Maneja selectedIncidentId para alternar entre pantallas sin navigator externo."
-        },
-        {
-          "file": "docs/architecture.mmd",
-          "description": "Diagrama Mermaid con los 4 límites (UI, Application, Domain, Infrastructure), dependencias dirigidas y roles de usuario. Verificado por course-tests/public/week-02.test.ts."
-        },
-        {
-          "file": "docs/adr/ADR-001-architecture.md",
-          "description": "ADR comparando Alternativa 1 (capas) vs Alternativa 2 (hooks planos). Documenta la decisión, consecuencias y trade-offs."
-        },
-        {
-          "file": "reports/week-02/dependencies.json",
-          "description": "Reporte del experimento AC-03: falla controlada (ui-->infrastructure en el diagrama + import prohibido en TS), detección con exit code 1, remediación y estado limpio con exit code 0."
-        }
+      "studentId": "Carlos",
+      "commitShas": [
+        "e4d0fe90cec7e308b124364dca0035c139022bba"
       ],
-      "technicalSignal": "Implementó el esqueleto completo de arquitectura en capas: dominio, aplicación, infraestructura y UI. Ejecutó y documentó el experimento de límites AC-03 verificable con comandos reales."
+      "files": [
+        "src/application/incidents/get-incidents.usecase.ts",
+        "src/application/incidents/get-incident-detail.usecase.ts",
+        "src/ui/screens/IncidentListScreen.tsx",
+        "src/ui/screens/IncidentDetailScreen.tsx",
+        "App.tsx"
+      ],
+      "tests": [
+        "npm run typecheck",
+        "npm run lint",
+        "npm run test:smoke"
+      ],
+      "reviews": [
+        "PR #8: implementacion de casos de uso y pantallas con inyeccion de dependencias"
+      ],
+      "prediction": "Al inyectar los casos de uso por props en la UI sin importar infraestructura, los limites de arquitectura se mantienen limpios y verificables.",
+      "command": "npm test -- course-tests/public/week-02.test.ts",
+      "observedResult": "PASS course-tests/public/week-02.test.ts (2 passed, 2 total) — limites respetados sin conexion directa de UI a infraestructura.",
+      "explanation": "La separacion de la UI respecto a la infraestructura garantiza que los componentes visuales dependan unicamente de casos de uso y tipos de dominio, facilitando pruebas unitarias aisladas y reemplazo de persistencia."
+    },
+    {
+      "studentId": "Alexis",
+      "commitShas": [
+        "02c7f37b3855afd07f5dc5c33732becd893e2f85"
+      ],
+      "files": [
+        "src/domain/incidents/incident.entity.ts",
+        "src/domain/incidents/incident-repository.port.ts",
+        "src/infrastructure/incidents/in-memory-incident.repository.ts"
+      ],
+      "tests": [
+        "npm run typecheck"
+      ],
+      "reviews": [
+        "PR #10 revisado y fusionado a main: modelo de dominio, puerto e implementacion en memoria"
+      ],
+      "prediction": "Definir el puerto de repositorio en el dominio permitira desacoplar la persistencia concreta de la logica de la aplicacion.",
+      "command": "git log --oneline src/domain/incidents/incident-repository.port.ts",
+      "observedResult": "02c7f37 feat(domain-infra): add incident entity, repository port and in-memory fake fusionado a main via PR #10.",
+      "explanation": "El puerto del repositorio en la capa de Dominio actua como contrato abstracto que invierte la dependencia de la Infraestructura hacia el Dominio (Dependency Inversion Principle)."
+    },
+    {
+      "studentId": "Pacheco",
+      "commitShas": [
+        "4039635a6fb66753d81c8ce508ec7c84d62dfdf3"
+      ],
+      "files": [
+        "docs/adr/ADR-001-architecture.md",
+        "docs/architecture.mmd"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-02.test.ts"
+      ],
+      "reviews": [
+        "PR #9 revisado y fusionado a main: ADR-001 y diagrama de arquitectura Mermaid"
+      ],
+      "prediction": "El diagrama Mermaid y el ADR formalizaran las cuatro capas y los perfiles de usuario exigidos por la rubrica de la semana 2.",
+      "command": "git log --oneline docs/adr/ADR-001-architecture.md docs/architecture.mmd",
+      "observedResult": "4039635 docs(arquitectura): agregar ADR-001 y diagrama Mermaid fusionado a main via PR #9.",
+      "explanation": "El ADR-001 documenta formalmente la evaluacion de alternativas arquitectonicas y el diagrama Mermaid modela las capas y perfiles, cumpliendo con la prueba publica week-02.test.ts."
     }
   ]
 }
