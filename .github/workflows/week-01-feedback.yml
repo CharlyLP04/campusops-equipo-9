@@ -2,11 +2,8 @@ name: Week 01 Public Feedback
 
 on:
   push:
-    branches:
-      - main
     tags:
       - week-01-final
-  pull_request:
   workflow_dispatch:
 
 permissions:
