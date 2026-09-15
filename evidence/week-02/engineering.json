@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 2,
-  "commitSha": "f7d854e5f761e1ef563b6385b7ececc969aaa444",
+  "commitSha": "a2effad0d9671b98009da0dab682f5a1f197444a",
   "decision": "Se adopta la arquitectura basada en Puertos y Adaptadores con cuatro capas estrictas: UI -> Application -> Domain <- Infrastructure.",
   "alternatives": [
     "Alternativa A: UI con servicios directos y llamadas acopladas en componentes de React Native, reduciendo archivos iniciales pero dificultando las pruebas y el cambio de persistencia.",
