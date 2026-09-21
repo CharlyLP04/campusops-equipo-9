@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "week": 3,
   "mode": "public",
-  "commitSha": "a20be11aee1b7b3a5c29c8d026fa7920ca385fe0",
-  "evaluatedAt": "2026-09-21T04:28:57.480330+00:00",
-  "status": "pass",
+  "commitSha": "3dbbd027f8219e8747f22d6b44fd85e406ef44f0",
+  "evaluatedAt": "2026-09-21T04:39:33.225255+00:00",
+  "status": "fail",
   "checks": [
     {
       "id": "base_files",
@@ -38,13 +38,13 @@
     },
     {
       "id": "schema:reports/week-03/security.json",
-      "status": "pass",
-      "detail": "6 checks indexed, 3 boundary/failure; report evaluates HEAD"
+      "status": "fail",
+      "detail": "commitSha must be HEAD or its direct evidence-only parent"
     },
     {
       "id": "schema:evidence/week-03/engineering.json",
-      "status": "pass",
-      "detail": "decision evidence is substantive and reproducible; report evaluates HEAD"
+      "status": "fail",
+      "detail": "commitSha must be HEAD or its direct evidence-only parent"
     },
     {
       "id": "schema:evidence/week-03/individual.json",
