@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "commitSha": "a20be11aee1b7b3a5c29c8d026fa7920ca385fe0",
+  "decision": "Se prioriza mitigar en primer lugar la amenaza T-03 (Exposicion y fuga de credenciales o secretos en CI y repositorio) implementando un gate estatico automatizado de escaneo con minimo privilegio en GitHub Actions (permissions: contents: read), complementado con el control de autorizacion T-01 en las transiciones de estado de incidencias.",
+  "alternatives": [
+    "Alternativa A: Confiar exclusivamente en revisiones manuales de codigo (PR reviews) y restricciones visuales en la interfaz de usuario para ocultar accesos segun perfil, sin verificacion automatica de secretos ni minimizacion de permisos en el runner de CI.",
+    "Alternativa B: Automatizar la deteccion preventiva en la puerta de enlace de CI/CD mediante escaneo obligatorio de secretos, verificacion de contratos con minimo privilegio (contents: read) y pruebas de autorizacion desacopladas de la interfaz grafica."
+  ],
+  "tradeoff": "Beneficio: Se previene la fuga irreversible de credenciales en el historial publico de Git y se impide que pull requests con permisos excesivos o tokens expuestos se fusionen a main. Costo: Introduce tiempo adicional en la ejecucion del pipeline de GitHub Actions y exige una rigurosa disciplina de desarrollo basada exclusivamente en fixtures sinteticos.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "result": "PASS course-tests/public/week-03.test.ts — verifica permisos minimos en el workflow (.github/workflows/week-03-ci-amenazas-feedback.yml) y presencia estructurada de activos, amenazas, controles y verificacion en docs/threat-model.md.",
+      "evidence": "reports/week-03/security.json — observaciones nominales y de falla controlada que demuestran la efectividad de las comprobaciones de CI y del modelo de amenazas."
+    },
+    {
+      "command": "python tools/course_public_evaluator.py --week 3 --mode verify",
+      "result": "PASS verify — valida integridad de archivos base, scripts del toolchain, ausencia de marcadores de bypass y escaneo limpio de secretos.",
+      "evidence": "reports/week-03/verify.json — reporte emitido por el evaluador del curso con estado pass en todos los checks obligatorios."
+    }
+  ]
+}
