@@ -4,11 +4,8 @@ name: Week 02 Academic Feedback
 
 on:
   push:
-    branches:
-      - main
     tags:
       - week-02-final
-  pull_request:
   workflow_dispatch:
 
 permissions:
