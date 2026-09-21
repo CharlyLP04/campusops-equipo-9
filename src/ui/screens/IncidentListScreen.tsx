@@ -1,7 +1,7 @@
+
 /**
  * IncidentListScreen — Capa UI
- * AUDITORÍA AC-03: este archivo NO importa nada de src/infrastructure.
- * Recibe el caso de uso mediante inyección de dependencias en sus props.
+ * No importa nada de src/infrastructure.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -21,51 +21,73 @@ import {
   IncidentStatus,
 } from '../../domain/incidents/incident.entity';
 
-// ─── Paleta de colores por estado oficial ────────────────────────────────────
 type BadgeColor = { bg: string; text: string };
 
 const STATUS_COLORS: Record<IncidentStatus, BadgeColor> = {
-  open:        { bg: '#FFF3CD', text: '#856404' },
-  assigned:    { bg: '#CCE5FF', text: '#004085' },
+  open: { bg: '#FFF3CD', text: '#856404' },
+  assigned: { bg: '#CCE5FF', text: '#004085' },
   in_progress: { bg: '#D4EDDA', text: '#155724' },
-  resolved:    { bg: '#D1ECF1', text: '#0C5460' },
-  closed:      { bg: '#E2E3E5', text: '#383D41' },
+  resolved: { bg: '#D1ECF1', text: '#0C5460' },
+  closed: { bg: '#E2E3E5', text: '#383D41' },
 };
 
-const FALLBACK_BADGE: BadgeColor = { bg: '#F3F4F6', text: '#374151' };
+const FALLBACK_BADGE: BadgeColor = {
+  bg: '#F3F4F6',
+  text: '#374151',
+};
 
-/** Devuelve siempre un BadgeColor válido; nunca undefined. */
 function getBadgeColor(status: IncidentStatus): BadgeColor {
   return STATUS_COLORS[status] ?? FALLBACK_BADGE;
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
 interface IncidentListScreenProps {
   getIncidentsUseCase: GetIncidentsUseCase;
   onSelectIncident: (id: string) => void;
 }
 
-// ─── Componente ───────────────────────────────────────────────────────────────
 export function IncidentListScreen({
   getIncidentsUseCase,
   onSelectIncident,
 }: IncidentListScreenProps) {
   const [incidents, setIncidents] = useState<readonly Incident[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadIncidents = useCallback(() => {
+    setLoading(true);
+    setError(false);
+
+    getIncidentsUseCase
+      .execute()
+      .then((data) => {
+        setIncidents(data);
+      })
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [getIncidentsUseCase]);
 
   useEffect(() => {
     let active = true;
+  
     getIncidentsUseCase
       .execute()
       .then((data) => {
         if (active) {
           setIncidents(data);
-          setLoading(false);
+          setError(false);
         }
       })
       .catch(() => {
+        if (active) setError(true);
+      })
+      .finally(() => {
         if (active) setLoading(false);
       });
+  
     return () => {
       active = false;
     };
@@ -73,8 +95,9 @@ export function IncidentListScreen({
 
   const renderItem = useCallback(
     ({ item }: { item: Incident }) => {
-      const badgeColors: BadgeColor = getBadgeColor(item.status);
-      const statusLabel = INCIDENT_STATUS_LABELS[item.status] ?? item.status;
+      const badgeColors = getBadgeColor(item.status);
+      const statusLabel =
+        INCIDENT_STATUS_LABELS[item.status] ?? item.status;
       const categoryLabel =
         INCIDENT_CATEGORY_LABELS[item.category] ?? item.category;
 
@@ -88,20 +111,35 @@ export function IncidentListScreen({
         >
           <View style={styles.cardHeader}>
             <Text style={styles.incidentId}>{item.id}</Text>
+
             <View
-              style={[styles.badge, { backgroundColor: badgeColors.bg }]}
+              style={[
+                styles.badge,
+                { backgroundColor: badgeColors.bg },
+              ]}
             >
-              <Text style={[styles.badgeText, { color: badgeColors.text }]}>
+              <Text
+                style={[
+                  styles.badgeText,
+                  { color: badgeColors.text },
+                ]}
+              >
                 {statusLabel}
               </Text>
             </View>
           </View>
+
           <Text style={styles.cardTitle} numberOfLines={2}>
             {item.description}
           </Text>
+
           <View style={styles.cardMeta}>
-            <Text style={styles.metaText}>📍 {item.location.label}</Text>
-            <Text style={styles.metaText}>🏷 {categoryLabel}</Text>
+            <Text style={styles.metaText}>
+              📍 {item.location.label}
+            </Text>
+            <Text style={styles.metaText}>
+              🏷️ {categoryLabel}
+            </Text>
           </View>
         </TouchableOpacity>
       );
@@ -112,7 +150,34 @@ export function IncidentListScreen({
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator testID="loading-indicator" size="large" color="#4F46E5" />
+        <ActivityIndicator
+          testID="loading-indicator"
+          size="large"
+          color="#4F46E5"
+        />
+        <Text style={styles.helperText}>Cargando incidencias...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.messageTitle}>
+          No se pudieron cargar las incidencias
+        </Text>
+        <Text style={styles.helperText}>
+          Verifica tu conexión e inténtalo nuevamente.
+        </Text>
+
+        <TouchableOpacity
+          testID="retry-button"
+          accessibilityRole="button"
+          style={styles.retryButton}
+          onPress={loadIncidents}
+        >
+          <Text style={styles.retryButtonText}>Reintentar</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -125,19 +190,32 @@ export function IncidentListScreen({
           Incidencias activas — {incidents.length} registradas
         </Text>
       </View>
-      <FlatList
-        testID="incident-list"
-        data={incidents}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+
+      {incidents.length === 0 ? (
+        <View style={styles.centered}>
+          <Text style={styles.messageTitle}>
+            No hay incidencias registradas
+          </Text>
+          <Text style={styles.helperText}>
+            Cuando se registre una incidencia, aparecerá aquí.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          testID="incident-list"
+          data={incidents}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => (
+            <View style={styles.separator} />
+          )}
+        />
+      )}
     </View>
   );
 }
 
-// ─── Estilos ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,6 +225,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 24,
   },
   header: {
     backgroundColor: '#4F46E5',
@@ -218,5 +297,30 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: '#6B7280',
+  },
+  messageTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  helperText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  retryButton: {
+    backgroundColor: '#4F46E5',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    marginTop: 20,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
