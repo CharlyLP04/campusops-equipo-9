@@ -1,9 +1,9 @@
 # Modelo de Amenazas Inicial — CampusOps
 
-**Versión:** 1.0  
-**Fecha:** 20 de septiembre de 2026  
-**Equipo:** Equipo 9 (Carlos Olaya Gutiérrez, Alexis, José Miguel Carrera Pacheco)  
-**Sistema:** CampusOps (React Native + Expo + TypeScript)  
+**Versión:** 1.0
+**Fecha:** 20 de septiembre de 2026
+**Equipo:** Equipo 9 (Carlos Olaya Gutiérrez, Alexis Montalvo Osorio, Carlos Alberto Pacheco Avila)
+**Sistema:** CampusOps (React Native + Expo + TypeScript)
 **Entorno:** Académico con datos exclusivamente sintéticos y ficticios.
 
 ---
@@ -77,6 +77,19 @@ Se establecen cuatro fronteras de confianza claras dentro de la arquitectura de 
 2. **Frontera F-02 (Perfiles y Autorización Horizontal/Vertical):** Cada perfil posee límites funcionales estrictos. Un técnico no puede modificar incidencias asignadas a otro técnico; un reportante no puede consultar reportes ajenos ni cambiar asignaciones; solo el coordinador puede cerrar o reasignar incidencias.
 3. **Frontera F-03 (Almacenamiento Local Offline vs. Red):** La cola offline en el dispositivo móvil preserva cambios pendientes con claves de idempotencia estables. La sincronización detecta conflictos cuando el estado remoto difiere de la base sobre la que trabajó el técnico.
 4. **Frontera F-04 (Integración Continua y Mínimo Privilegio):** El runner de CI (GitHub Actions) opera con privilegios mínimos declarados explícitamente (`permissions: contents: read`), evitando credenciales de escritura o tokens de repositorio innecesarios.
+
+
+### Validación de permisos por rol
+
+Como parte de la revisión de seguridad, se verificaron las responsabilidades y restricciones de los tres perfiles de CampusOps:
+
+| Perfil | Acciones permitidas | Acciones que deben rechazarse |
+|---|---|---|
+| Reportante | Crear incidencias y consultar las que él mismo reportó. | Consultar incidencias ajenas, asignar técnicos o cerrar incidencias. |
+| Técnico | Consultar y actualizar incidencias que tenga asignadas. | Modificar incidencias asignadas a otro técnico o reasignarse trabajo. |
+| Coordinador | Consultar incidencias, asignar técnicos y supervisar cambios de estado. | Ejecutar operaciones sin una sesión válida o alterar información sin dejar trazabilidad. |
+
+Estas restricciones deben comprobarse en el servicio o backend. Ocultar botones en la interfaz no es suficiente, porque una solicitud podría enviarse directamente a la API. Las pruebas deben verificar respuestas `403 Forbidden` para operaciones no autorizadas y confirmar que la incidencia permanece sin cambios.
 
 ---
 
