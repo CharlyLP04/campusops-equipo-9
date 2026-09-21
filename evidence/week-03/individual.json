@@ -51,27 +51,25 @@
       "explanation": "La cobertura de pruebas unitarias sobre los componentes visuales garantiza que el manejo de estados de carga y error se comporte de forma determinista y sin fallos."
     },
     {
-      "studentId": "Pacheco",
-      "commitShas": [
-        "4039635a6fb66753d81c8ce508ec7c84d62dfdf3",
-        "895bbc29dc9db11ee4a284522fc1de3f162c3027"
-      ],
-      "files": [
-        "docs/threat-model.md",
-        "docs/assignments/week-03.md",
-        "docs/assignments/week-03-rubric.md"
-      ],
-      "tests": [
-        "npm run audit:ci",
-        "npm run test:smoke"
-      ],
-      "reviews": [
-        "PR #17 revisado y aprobado formalmente: aprobacion de workflow de feedback de semana 3"
-      ],
-      "prediction": "Al ejecutar el escaneo de secretos y la auditoria de dependencias en CI, se detectaran posibles patrones de credenciales o paquetes vulnerables antes de la entrega.",
-      "command": "npm run audit:ci",
-      "observedResult": "audited 971 packages in 18s — 0 critical vulnerabilities, scan_secrets cleanly passed with hits=[].",
-      "explanation": "La verificacion estatica de secretos y el analisis automatizado de dependencias aseguran que ningun token sintetico o llave privada se filtre al historial publico de Git, cumpliendo la condicion G3 de la rubrica."
-    }
+  "studentId": "Pacheco",
+  "commitShas": [
+    "034de4fa4243105b8536d156edb5d39dc8ed2b46"
+  ],
+  "files": [
+    "docs/threat-model.md"
+  ],
+  "tests": [
+    "npm.cmd test -- --ci --runInBand course-tests/public/week-03.test.ts",
+    "npm.cmd run typecheck",
+    "npm.cmd run audit:ci"
+  ],
+  "reviews": [
+    "Revision del modelo de amenazas y validacion de permisos para Reportante, Tecnico y Coordinador."
+  ],
+  "prediction": "Al documentar y verificar las restricciones de cada rol, las operaciones no autorizadas deben rechazarse en el backend con HTTP 403 sin modificar la incidencia.",
+  "command": "npm.cmd test -- --ci --runInBand course-tests/public/week-03.test.ts",
+  "observedResult": "PASS: 1 suite y 2 pruebas aprobadas. TypeScript finalizo sin errores. La auditoria no encontro vulnerabilidades criticas, aunque reporto 2 vulnerabilidades de severidad alta en dependencias transitivas.",
+  "explanation": "Valide que los permisos se comprueben en el servicio y no solamente ocultando controles en la interfaz. El Reportante se limita a sus incidencias, el Tecnico a las incidencias asignadas y el Coordinador administra asignaciones y estados con una sesion valida."
+}
   ]
 }
