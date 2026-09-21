@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "teamId": "equipo-9",
+  "members": [
+    {
+      "studentId": "Carlos",
+      "commitShas": [
+        "f1d7c46dc5c828469e6395c3d4249ce9aa43c1d9",
+        "2318cb4c0db52e1ebcff674e1d320ea4b4f3b603"
+      ],
+      "files": [
+        ".github/workflows/week-03-ci-amenazas-feedback.yml",
+        ".github/workflows/starter-feedback.yml",
+        "docs/assignments/week-03-repository.md"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-03.test.ts",
+        "python tools/course_public_evaluator.py --week 3 --mode verify"
+      ],
+      "reviews": [
+        "PR #17 creado y fusionado a main: configuracion de CI con fix de checkout y permisos minimos"
+      ],
+      "prediction": "Al incorporar el bloque with con ref y fetch-depth: 2 en actions/checkout@v4 y fijar permissions: contents: read, el workflow de CI garantiza la trazabilidad reproducible del commit evaluado y pasa week-03.test.ts.",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "observedResult": "PASS course-tests/public/week-03.test.ts (2 passed, 2 total) — feedback workflow preserves critical checks and least privilege.",
+      "explanation": "Fijar el SHA exacto en el checkout previene discrepancias entre eventos de pull request y push de tags, mientras que restringir permisos a contents: read respeta el principio de minimo privilegio exigido por la rubrica academica."
+    },
+    {
+      "studentId": "Alexis",
+      "commitShas": [
+        "b5bb38096f9ff228c2fffe1157bc8fa9dffaa203",
+        "a69595cd0876fc6d691e81394f4ce312b9183427"
+      ],
+      "files": [
+        "src/ui/screens/IncidentListScreen.tsx",
+        "course-tests/incident-list-screen.test.tsx",
+        "docs/threat-model.md"
+      ],
+      "tests": [
+        "npx jest course-tests/incident-list-screen.test.tsx",
+        "npm test -- course-tests/public/week-03.test.ts"
+      ],
+      "reviews": [
+        "PR #18 creado y fusionado a main: mejora de interfaz de lista de incidencias y pruebas asociadas"
+      ],
+      "prediction": "Al mejorar la pantalla de incidentes y agregar pruebas unitarias aisladas, se refuerza la validacion de presentacion sin depender de servicios externos.",
+      "command": "npx jest course-tests/incident-list-screen.test.tsx",
+      "observedResult": "PASS course-tests/incident-list-screen.test.tsx — pruebas de renderizado e interaccion de incidencias completadas con exito.",
+      "explanation": "La cobertura de pruebas unitarias sobre los componentes visuales garantiza que el manejo de estados de carga y error se comporte de forma determinista y sin fallos."
+    },
+    {
+      "studentId": "Pacheco",
+      "commitShas": [
+        "4039635a6fb66753d81c8ce508ec7c84d62dfdf3",
+        "895bbc29dc9db11ee4a284522fc1de3f162c3027"
+      ],
+      "files": [
+        "docs/threat-model.md",
+        "docs/assignments/week-03.md",
+        "docs/assignments/week-03-rubric.md"
+      ],
+      "tests": [
+        "npm run audit:ci",
+        "npm run test:smoke"
+      ],
+      "reviews": [
+        "PR #17 revisado y aprobado formalmente: aprobacion de workflow de feedback de semana 3"
+      ],
+      "prediction": "Al ejecutar el escaneo de secretos y la auditoria de dependencias en CI, se detectaran posibles patrones de credenciales o paquetes vulnerables antes de la entrega.",
+      "command": "npm run audit:ci",
+      "observedResult": "audited 971 packages in 18s — 0 critical vulnerabilities, scan_secrets cleanly passed with hits=[].",
+      "explanation": "La verificacion estatica de secretos y el analisis automatizado de dependencias aseguran que ningun token sintetico o llave privada se filtre al historial publico de Git, cumpliendo la condicion G3 de la rubrica."
+    }
+  ]
+}

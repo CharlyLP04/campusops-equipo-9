@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "week": 3,
+  "commitSha": "a20be11aee1b7b3a5c29c8d026fa7920ca385fe0",
+  "generatedAt": "2026-09-21T04:23:00Z",
+  "checks": [
+    {
+      "id": "ci-workflow-least-privilege-pass",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "evidence": "PASS course-tests/public/week-03.test.ts: El workflow publico restringe permisos a 'permissions: contents: read', delega la instalacion a 'make setup' con Node 22 y ejecuta sin bypass las metas obligatorias verify-week-03 y public-test-week-03."
+    },
+    {
+      "id": "ci-workflow-permissions-failure",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "evidence": "FAIL course-tests/public/week-03.test.ts: Se introdujo intencionalmente 'permissions: write-all' y 'continue-on-error: true' en .github/workflows/week-03-ci-amenazas-feedback.yml para verificar que el pipeline rechace privilegios elevados y bypasses. Jest detecto la violacion: expect(workflow).not.toMatch(/continue-on-error:\\s*true/i) fallo correctamente."
+    },
+    {
+      "id": "threat-model-coverage-pass",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "evidence": "PASS course-tests/public/week-03.test.ts: El modelo de amenazas en docs/threat-model.md vincula formalmente activos, amenazas priorizadas, fronteras de confianza, controles tecnicos y metodos de verificacion comprobables."
+    },
+    {
+      "id": "secret-scan-pattern-failure",
+      "status": "fail",
+      "scenarioType": "failure",
+      "command": "python tools/course_public_evaluator.py --week 3 --mode verify",
+      "evidence": "FAIL secret_scan: Se probo la deteccion de fuga inyectando un token sintetico de prueba con prefijo 'ghp_fake-token-simulado' en un archivo temporal. El evaluador detuvo la ejecucion reportando 'hits=[temp_fixture.txt:github_token]', demostrando que las comprobaciones no ocultan fallas de seguridad."
+    },
+    {
+      "id": "secret-scan-clean-pass",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "python tools/course_public_evaluator.py --week 3 --mode verify",
+      "evidence": "PASS secret_scan: Escaneo estatico recursivo del arbol del repositorio completado sin coincidencias con patrones de claves privadas RSA/EC ni tokens de acceso (hits=[])."
+    },
+    {
+      "id": "boundary-missing-threat-model",
+      "status": "fail",
+      "scenarioType": "boundary",
+      "command": "npm test -- course-tests/public/week-03.test.ts",
+      "evidence": "FAIL course-tests/public/week-03.test.ts: Simulacion de ausencia de docs/threat-model.md. La prueba fallo con ENOENT demostrando que la suite no enmascara la falta del modelo de amenazas con falsos positivos."
+    }
+  ]
+}
