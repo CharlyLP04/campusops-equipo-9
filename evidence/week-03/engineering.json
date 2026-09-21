@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 3,
-  "commitSha": "3dbbd027f8219e8747f22d6b44fd85e406ef44f0",
+  "commitSha": "034de4fa4243105b8536d156edb5d39dc8ed2b46",
   "decision": "Se prioriza mitigar en primer lugar la amenaza T-03 (Exposicion y fuga de credenciales o secretos en CI y repositorio) implementando un gate estatico automatizado de escaneo con minimo privilegio en GitHub Actions (permissions: contents: read), complementado con el control de autorizacion T-01 en las transiciones de estado de incidencias.",
   "alternatives": [
     "Alternativa A: Confiar exclusivamente en revisiones manuales de codigo (PR reviews) y restricciones visuales en la interfaz de usuario para ocultar accesos segun perfil, sin verificacion automatica de secretos ni minimizacion de permisos en el runner de CI.",
