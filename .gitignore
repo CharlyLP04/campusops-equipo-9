@@ -5,8 +5,13 @@ ios/
 coverage/
 .jest-cache/
 dist/
+# Environment files
 .env
-*.jks
+.env*.local
+.env.production
+.env.development
+.env.backup
+*.env
 *.keystore
 *.p8
 *.p12
