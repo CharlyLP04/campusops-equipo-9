@@ -182,13 +182,6 @@ export function IncidentDetailScreen({
               <InfoRow label="Categoría" value={categoryLabel} />
               <View style={styles.divider} />
               <InfoRow label="Estado" value={statusLabel} />
-              <View style={styles.divider} />
-              <InfoRow label="Reportado por" value={incident.reporterId} />
-              <View style={styles.divider} />
-              <InfoRow
-                label="Técnico asignado"
-                value={incident.assignedTechnicianId ?? 'Sin asignar'}
-              />
             </View>
           </View>
 

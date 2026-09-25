@@ -12,8 +12,91 @@ function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
 }
 
-export function redactForTelemetry(_input: unknown): unknown {
-  return pending('redactForTelemetry');
+const REDACTED_VALUE = '[REDACTED]';
+
+const SENSITIVE_TELEMETRY_KEYS = new Set([
+  'authorization',
+  'accesstoken',
+  'refreshtoken',
+  'token',
+  'password',
+  'secret',
+  'credential',
+  'cookie',
+  'email',
+  'displayname',
+  'fullname',
+  'username',
+  'userid',
+  'actorid',
+  'reporterid',
+  'technicianid',
+  'assignedtechnicianid',
+  'coordinatorid',
+  'location',
+  'latitude',
+  'longitude',
+  'coordinates',
+  'address',
+  'geolocation',
+  'photo',
+  'photos',
+  'image',
+  'images',
+  'evidence',
+  'attachment',
+  'attachments',
+  'internalcomment',
+  'internalcomments',
+  'internalnote',
+  'internalnotes',
+]);
+
+function normalizeTelemetryKey(key: string): string {
+  return key.replace(/[^a-z0-9]/gi, '').toLowerCase();
+}
+
+function isSensitiveTelemetryKey(key: string): boolean {
+  const normalizedKey = normalizeTelemetryKey(key);
+  return SENSITIVE_TELEMETRY_KEYS.has(normalizedKey)
+    || normalizedKey.includes('token')
+    || normalizedKey.includes('password')
+    || normalizedKey.includes('secret')
+    || normalizedKey.includes('credential')
+    || normalizedKey.includes('email')
+    || normalizedKey.includes('location')
+    || normalizedKey.includes('latitude')
+    || normalizedKey.includes('longitude')
+    || normalizedKey.includes('coordinate')
+    || normalizedKey.includes('address')
+    || normalizedKey.includes('geolocation')
+    || normalizedKey.includes('photo')
+    || normalizedKey.includes('image')
+    || normalizedKey.includes('evidence')
+    || normalizedKey.includes('attachment')
+    || normalizedKey.includes('internalcomment')
+    || normalizedKey.includes('internalnote');
+}
+
+function redactTelemetryValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(redactTelemetryValue);
+  }
+
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        isSensitiveTelemetryKey(key) ? REDACTED_VALUE : redactTelemetryValue(nestedValue),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+export function redactForTelemetry(input: unknown): unknown {
+  return redactTelemetryValue(input);
 }
 
 export function parseRemoteResource(_input: unknown): ParseResult {
