@@ -3,7 +3,7 @@
  * AUDITORÍA AC-03: este archivo NO importa nada de src/infrastructure.
  * Recibe el caso de uso mediante inyección de dependencias en sus props.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -11,31 +11,31 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-import { GetIncidentDetailUseCase } from '../../application/incidents/get-incident-detail.usecase';
+import { GetIncidentDetailUseCase } from "../../application/incidents/get-incident-detail.usecase";
 import {
   INCIDENT_CATEGORY_LABELS,
   INCIDENT_STATUS_LABELS,
   Incident,
   IncidentStatus,
-} from '../../domain/incidents/incident.entity';
+} from "../../domain/incidents/incident.entity";
 
 // ─── Paleta de colores por estado oficial ────────────────────────────────────
 type StatusColor = { bg: string; text: string; border: string };
 
 const STATUS_COLORS: Record<IncidentStatus, StatusColor> = {
-  open:        { bg: '#FFF3CD', text: '#856404', border: '#FFEEBA' },
-  assigned:    { bg: '#CCE5FF', text: '#004085', border: '#B8DAFF' },
-  in_progress: { bg: '#D4EDDA', text: '#155724', border: '#C3E6CB' },
-  resolved:    { bg: '#D1ECF1', text: '#0C5460', border: '#BEE5EB' },
-  closed:      { bg: '#E2E3E5', text: '#383D41', border: '#D6D8DB' },
+  open: { bg: "#FFF3CD", text: "#856404", border: "#FFEEBA" },
+  assigned: { bg: "#CCE5FF", text: "#004085", border: "#B8DAFF" },
+  in_progress: { bg: "#D4EDDA", text: "#155724", border: "#C3E6CB" },
+  resolved: { bg: "#D1ECF1", text: "#0C5460", border: "#BEE5EB" },
+  closed: { bg: "#E2E3E5", text: "#383D41", border: "#D6D8DB" },
 };
 
 const FALLBACK_COLOR: StatusColor = {
-  bg: '#F3F4F6',
-  text: '#374151',
-  border: '#E5E7EB',
+  bg: "#F3F4F6",
+  text: "#374151",
+  border: "#E5E7EB",
 };
 
 /** Devuelve siempre un StatusColor válido; nunca undefined. */
@@ -97,12 +97,12 @@ export function IncidentDetailScreen({
     incident != null ? getStatusColor(incident.status) : FALLBACK_COLOR;
   const statusLabel =
     incident != null
-      ? INCIDENT_STATUS_LABELS[incident.status] ?? incident.status
-      : '';
+      ? (INCIDENT_STATUS_LABELS[incident.status] ?? incident.status)
+      : "";
   const categoryLabel =
     incident != null
-      ? INCIDENT_CATEGORY_LABELS[incident.category] ?? incident.category
-      : '';
+      ? (INCIDENT_CATEGORY_LABELS[incident.category] ?? incident.category)
+      : "";
 
   return (
     <View style={styles.container}>
@@ -125,7 +125,11 @@ export function IncidentDetailScreen({
       {/* Estado: cargando */}
       {loading && (
         <View style={styles.centered}>
-          <ActivityIndicator testID="detail-loading" size="large" color="#4F46E5" />
+          <ActivityIndicator
+            testID="detail-loading"
+            size="large"
+            color="#4F46E5"
+          />
         </View>
       )}
 
@@ -153,10 +157,7 @@ export function IncidentDetailScreen({
             ]}
           >
             <Text
-              style={[
-                styles.statusBannerText,
-                { color: statusColor.text },
-              ]}
+              style={[styles.statusBannerText, { color: statusColor.text }]}
             >
               {statusLabel}
             </Text>
@@ -177,17 +178,24 @@ export function IncidentDetailScreen({
             <View style={styles.infoCard}>
               <InfoRow label="Ubicación" value={incident.location.label} />
               <View style={styles.divider} />
-              <InfoRow label="Origen de ubicación" value={incident.location.source} />
+              <InfoRow
+                label="Origen de ubicación"
+                value={incident.location.source}
+              />
               <View style={styles.divider} />
               <InfoRow label="Categoría" value={categoryLabel} />
               <View style={styles.divider} />
               <InfoRow label="Estado" value={statusLabel} />
               <View style={styles.divider} />
-              <InfoRow label="Reportado por" value={incident.reporterId} />
+              <InfoRow label="Reportado por" value="Identidad protegida" />
               <View style={styles.divider} />
               <InfoRow
                 label="Técnico asignado"
-                value={incident.assignedTechnicianId ?? 'Sin asignar'}
+                value={
+                  incident.assignedTechnicianId != null
+                    ? "Técnico asignado"
+                    : "Sin asignar"
+                }
               />
             </View>
           </View>
@@ -212,42 +220,42 @@ export function IncidentDetailScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   centered: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 24,
   },
   navbar: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: "#4F46E5",
     paddingTop: 52,
     paddingBottom: 14,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   backArrow: {
     fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   backLabel: {
     fontSize: 15,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    color: "#FFFFFF",
+    fontWeight: "500",
   },
   navTitle: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   navPlaceholder: {
     width: 56,
@@ -262,17 +270,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginBottom: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   statusBannerText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   incidentId: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontWeight: "600",
+    color: "#6B7280",
     letterSpacing: 1,
     marginBottom: 12,
   },
@@ -281,79 +289,79 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#4F46E5',
+    fontWeight: "700",
+    color: "#4F46E5",
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginBottom: 8,
   },
   description: {
     fontSize: 15,
-    color: '#374151',
+    color: "#374151",
     lineHeight: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   infoCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
+    borderColor: "#E5E7EB",
+    overflow: "hidden",
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
   infoLabel: {
     fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: "#6B7280",
+    fontWeight: "500",
   },
   infoValue: {
     fontSize: 13,
-    color: '#111827',
-    fontWeight: '600',
-    maxWidth: '60%',
-    textAlign: 'right',
+    color: "#111827",
+    fontWeight: "600",
+    maxWidth: "60%",
+    textAlign: "right",
   },
   divider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     marginHorizontal: 14,
   },
   backButtonBottom: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: "#4F46E5",
     borderRadius: 10,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   backButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   notFoundText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   retryButton: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: "#4F46E5",
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   retryText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: "#FFFFFF",
+    fontWeight: "700",
   },
 });
