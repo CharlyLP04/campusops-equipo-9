@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 4,
-  "commitSha": "54cc4da61ce4ff00bd6831edf192539e1a3051a8",
+  "commitSha": "1d09bdc55eb0fa92348ccad950b2ba71f073f535",
   "decision": "Se decide implementar una arquitectura de almacenamiento segregada donde las credenciales criticas (tokens de sesion de portador y llaves de acceso) se gestionan exclusivamente a traves de un mecanismo seguro protegido a nivel de sistema operativo (SecureStore), mientras que los datos operativos de incidencias y la cola offline se preservan en la base de datos local SQLite.",
   "alternatives": [
     "Alternativa A: Almacenar tanto los tokens de sesion como la informacion operativa de incidencias en texto plano dentro de SQLite o AsyncStorage para simplificar el modelo de persistencia.",
