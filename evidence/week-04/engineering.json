@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "54cc4da61ce4ff00bd6831edf192539e1a3051a8",
+  "decision": "Se decide implementar una arquitectura de almacenamiento segregada donde las credenciales criticas (tokens de sesion de portador y llaves de acceso) se gestionan exclusivamente a traves de un mecanismo seguro protegido a nivel de sistema operativo (SecureStore), mientras que los datos operativos de incidencias y la cola offline se preservan en la base de datos local SQLite.",
+  "alternatives": [
+    "Alternativa A: Almacenar tanto los tokens de sesion como la informacion operativa de incidencias en texto plano dentro de SQLite o AsyncStorage para simplificar el modelo de persistencia.",
+    "Alternativa B: Separar el almacenamiento de alta confidencialidad usando SecureStore para tokens y SQLite para incidencias, sanitizando ademas cualquier registro previo a su volcado en telemetria o logs de error."
+  ],
+  "tradeoff": "Beneficio: El aislamiento en SecureStore reduce drasticamente el impacto ante una lectura casual o inspeccion del almacenamiento local del dispositivo. Costo: Introduce asincronia obligatoria en el acceso a credenciales y requiere mantener dos canales de persistencia separados con riesgo residual ante dispositivos fisicamente rooteados.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/public/week-04.test.ts",
+      "result": "PASS course-tests/public/week-04.test.ts (1 passed, 1 total) — sanitizacion de datos personales y contexto tecnico conservado.",
+      "evidence": "reports/week-04/negative-tests.json — validacion de sanitizacion recursiva y pruebas negativas."
+    },
+    {
+      "command": "python tools/course_public_evaluator.py --week 4 --mode verify",
+      "result": "PASS verify — base_files, react_native_profile, toolchain_scripts, workflow_integrity y secret_scan con hits=[].",
+      "evidence": "reports/week-04/secret-scan.json — escaneo estatico del repositorio confirmando ausencia de secretos."
+    }
+  ]
+}
