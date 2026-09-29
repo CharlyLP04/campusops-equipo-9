@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "commitSha": "54cc4da61ce4ff00bd6831edf192539e1a3051a8",
+  "generatedAt": "2026-09-29T04:35:00Z",
+  "checks": [
+    {
+      "id": "public-redact-telemetry-nominal",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- course-tests/public/week-04.test.ts",
+      "evidence": "PASS course-tests/public/week-04.test.ts: redactForTelemetry sanitiza datos personales (email, displayName, location, photos, internalComments) reemplazando valores por [REDACTED] y conservando incidentId."
+    },
+    {
+      "id": "nested-and-cyclic-structures-boundary",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- course-tests/week-04-negative.test.ts",
+      "evidence": "PASS: Manejo exitoso de estructuras anidadas complejas y referencias circulares protegidas con WeakSet sin desbordamiento de pila ni mutacion del objeto original."
+    },
+    {
+      "id": "network-error-response-sanitization-failure",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- course-tests/week-04-negative.test.ts",
+      "evidence": "PASS: Errores simulados de red con payloads que contenian Bearer tokens y credenciales fueron interceptados y sanitizados sin filtrar secretos en los mensajes de error."
+    }
+  ]
+}

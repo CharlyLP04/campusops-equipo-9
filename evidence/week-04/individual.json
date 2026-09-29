@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "week": 4,
+  "teamId": "equipo-9",
+  "members": [
+    {
+      "studentId": "Carlos",
+      "commitShas": [
+        "0e4c6a50d8aaad096fe0762cd8057a213568578a"
+      ],
+      "files": [
+        ".github/workflows/week-04-seguridad-privacidad-feedback.yml",
+        "src/domain/security/secure-storage.port.ts",
+        "src/infrastructure/security/secure-storage.service.ts",
+        "src/infrastructure/security/safe-error-handler.ts",
+        "course-tests/secure-storage.test.ts"
+      ],
+      "tests": [
+        "npx jest course-tests/secure-storage.test.ts",
+        "npm run typecheck"
+      ],
+      "reviews": [
+        "PR #23 creado y fusionado: workflow de CI semana 4, almacenamiento seguro y manejo defensivo de errores"
+      ],
+      "prediction": "Al encapsular las excepciones de red en SafeErrorHandler y aislar los tokens en SecureStorageService, los errores de conexion no expondran Bearer tokens ni credenciales en logs o interfaces graficas.",
+      "command": "npx jest course-tests/secure-storage.test.ts",
+      "observedResult": "PASS course-tests/secure-storage.test.ts (4 passed, 4 total) — enmascaramiento verificado en excepciones y aislamiento de claves.",
+      "explanation": "El manejo seguro de excepciones intercepta trazas y llamadas de API antes de que sean registradas por el runtime, garantizando que el principio de defensa en profundidad se cumpla ante fallos imprevistos de comunicacion."
+    },
+    {
+      "studentId": "Alexis",
+      "commitShas": [
+        "5e041dc2f438e03594b98483109806af3d6d2601"
+      ],
+      "files": [
+        "src/course-evaluation/index.ts",
+        "course-tests/week-04-negative.test.ts",
+        "reports/week-04/negative-tests.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-04.test.ts",
+        "npm test -- course-tests/week-04-negative.test.ts"
+      ],
+      "reviews": [
+        "PR #24 creado y fusionado: implementacion de sanitizacion recursiva redactForTelemetry y pruebas negativas"
+      ],
+      "prediction": "Al recorrer recursivamente los objetos y enmascarar claves sensibles sin mutar la entrada original, se previene la filtracion de datos de usuario en telemetria respetando el contrato de la API.",
+      "command": "npm test -- course-tests/public/week-04.test.ts",
+      "observedResult": "PASS course-tests/public/week-04.test.ts (1 passed, 1 total) — campos sensibles sustituidos por [REDACTED].",
+      "explanation": "La funcion redactForTelemetry procesa arreglos y objetos anidados de manera inmutable utilizando WeakSet para evitar ciclos infinitos y sustituyendo credenciales por la marca estandar [REDACTED]."
+    },
+    {
+      "studentId": "Pacheco",
+      "commitShas": [
+        "6b8e9a615206531fbe6f4ae2b5d527ac40fa50e7",
+        "36b1d2f2a1b7b570ed93a0be9279e9f7b1ea26ff"
+      ],
+      "files": [
+        "docs/security-controls.md",
+        "reports/week-04/secret-scan.json"
+      ],
+      "tests": [
+        "npm run audit:ci",
+        "python tools/course_public_evaluator.py --week 04 --mode verify"
+      ],
+      "reviews": [
+        "PR #25 creado y fusionado: documentacion de controles de seguridad, justificacion de almacenamiento y escaneo de secretos"
+      ],
+      "prediction": "Al documentar formalmente la separacion entre SecureStore y SQLite y ejecutar el escaneo estatico de secretos, el repositorio garantizara cumplimiento normativo sin credenciales expuestas.",
+      "command": "python tools/course_public_evaluator.py --week 04 --mode verify",
+      "observedResult": "PASS verify — secret_scan con hits=[] y workflow_integrity sin marcadores de bypass.",
+      "explanation": "La documentacion de controles conecta las amenazas T-01 a T-04 con verificaciones ejecutables y explicita el riesgo residual de compromiso fisico en dispositivos rooteados, cumpliendo la condicion AC-02."
+    }
+  ]
+}
