@@ -1,0 +1,40 @@
+{
+    "week": "04",
+    "owner": "Alexis Montalvo",
+    "purpose": "Evidencia reproducible de pruebas negativas y de frontera para redactForTelemetry",
+    "tests": [
+      {
+        "name": "nested arrays and objects",
+        "command": "npm test -- course-tests/week-04-negative.test.ts",
+        "result": "passed"
+      },
+      {
+        "name": "technical telemetry preservation",
+        "result": "passed"
+      },
+      {
+        "name": "input immutability",
+        "result": "passed"
+      },
+      {
+        "name": "network error response sanitization",
+        "result": "passed"
+      },
+      {
+        "name": "cyclic structures",
+        "result": "passed"
+      },
+      {
+        "name": "official Week 04 test",
+        "command": "npm test -- course-tests/public/week-04.test.ts",
+        "result": "passed"
+      }
+    ],
+    "summary": {
+      "negative_tests_passed": 5,
+      "official_tests_passed": 1,
+      "sensitive_data_redacted": true,
+      "cyclic_structures_handled": true,
+      "original_input_mutated": false
+    }
+  }

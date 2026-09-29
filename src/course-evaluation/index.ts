@@ -12,8 +12,60 @@ function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
 }
 
-export function redactForTelemetry(_input: unknown): unknown {
-  return pending('redactForTelemetry');
+export function redactForTelemetry(input: unknown): unknown {
+  const sensitiveKeys = new Set([
+    'authorization',
+    'password',
+    'token',
+    'accesstoken',
+    'refreshtoken',
+    'email',
+    'displayname',
+    'name',
+    'userid',
+    'reporterid',
+    'technicianid',
+    'assignedtechnicianid',
+    'location',
+    'latitude',
+    'longitude',
+    'photos',
+    'evidence',
+    'internalcomments',
+    'assignmenthistory',
+  ]);
+
+  const normalizeKey = (key: string): string =>
+    key.toLowerCase().replace(/[_-]/g, '');
+
+  const seen = new WeakSet<object>();
+
+  const redact = (value: unknown): unknown => {
+    if (value === null || typeof value !== 'object') {
+      return value;
+    }
+
+    if (seen.has(value)) {
+      return '[Circular]';
+    }
+
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+      return value.map(redact);
+    }
+
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        sensitiveKeys.has(normalizeKey(key))
+          ? '[REDACTED]'
+          : redact(nestedValue),
+      ]),
+    );
+  };
+
+  return redact(input);
 }
 
 export function parseRemoteResource(_input: unknown): ParseResult {
