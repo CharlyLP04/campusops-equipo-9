@@ -1,0 +1,45 @@
+{
+    "week": "04",
+    "student": "Alexis Montalvo",
+    "branch": "feat/telemetry-sanitization-alexis",
+    "area": "Desarrollo Core, Lógica de Sanitización y Pruebas Negativas",
+    "objective": "Implementar redactForTelemetry para sanitizar información sensible en estructuras anidadas y agregar pruebas negativas y de frontera.",
+    "files": [
+      "src/course-evaluation/index.ts",
+      "course-tests/week-04-negative.test.ts",
+      "reports/week-04/negative-tests.json"
+    ],
+    "changes": [
+      "Implementación recursiva de redactForTelemetry.",
+      "Normalización de claves eliminando guiones y guiones bajos.",
+      "Redacción de información sensible con [REDACTED].",
+      "Preservación del contexto técnico de telemetría.",
+      "Protección contra estructuras cíclicas mediante WeakSet.",
+      "Pruebas para objetos y arreglos anidados.",
+      "Prueba de no mutación del objeto original.",
+      "Prueba de respuestas de error de red."
+    ],
+    "verification": [
+      {
+        "command": "npx tsc --noEmit",
+        "result": "passed"
+      },
+      {
+        "command": "npx eslint .",
+        "result": "passed"
+      },
+      {
+        "command": "npm test -- course-tests/public/week-04.test.ts",
+        "result": "passed"
+      },
+      {
+        "command": "npm test -- course-tests/week-04-negative.test.ts",
+        "result": "passed"
+      }
+    ],
+    "test_results": {
+      "official_tests": "1/1 passed",
+      "negative_tests": "5/5 passed"
+    },
+    "notes": "La implementación evita exponer información sensible en estructuras anidadas y maneja referencias cíclicas sin producir recursión infinita."
+  }
