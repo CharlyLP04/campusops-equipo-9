@@ -9,6 +9,6 @@ export class GetIncidentDetailUseCase {
   constructor(private readonly repository: IncidentRepository) {}
 
   async execute(id: string): Promise<Incident | undefined> {
-    return this.repository.findById(id);
+    return await this.repository.findById(id);
   }
 }
