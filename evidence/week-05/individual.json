@@ -4,6 +4,32 @@
   "teamId": "equipo-9",
   "members": [
     {
+      "studentId": "Carlos",
+      "commitShas": [
+        "54cbcb37cbd6c8ae2f884e3cd7875e4b006e0433"
+      ],
+      "files": [
+        ".github/workflows/week-05-cliente-cloud-feedback.yml",
+        "docs/api-contract.md",
+        "src/course-evaluation/index.ts",
+        "src/domain/incidents/cloud-errors.ts",
+        "course-tests/cloud-contract-validation.test.ts",
+        "evidence/week-05/engineering.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/cloud-contract-validation.test.ts",
+        "npm test -- course-tests/public/week-05.test.ts",
+        "npm run typecheck"
+      ],
+      "reviews": [
+        "PR #29 creado y fusionado: workflow de CI semana 5, contrato de API, parseRemoteResource y decision tecnica"
+      ],
+      "prediction": "Al implementar la validacion de sobre remoto en parseRemoteResource y modelar errores tipados, el cliente cloud rechazara datos corruptos y tratara timeouts o errores 500 como estados controlados sin provocar excepciones no capturadas ni filtrar datos en los componentes de UI.",
+      "command": "npm test -- course-tests/cloud-contract-validation.test.ts course-tests/public/week-05.test.ts",
+      "observedResult": "PASS: 17 pruebas completadas exitosamente; parseRemoteResource valida recursos conformes y rechaza violaciones de sobre remoto con { ok: false, error: 'contract' }.",
+      "explanation": "Se establecio la frontera formal entre DTOs y dominio. La funcion parseRemoteResource valida exhaustivamente tipos, versiones enteras, estatus no vacios y payloads (incluyendo null valido y tolerancia a campos futuros), canalizando cualquier anomalia hacia errores tipados de dominio."
+    },
+    {
       "studentId": "Alexis",
       "commitShas": [
         "d28107d354e18d3bc7f1ee5b857b72bbbaaf2b65"
@@ -13,20 +39,22 @@
         "src/application/incidents/create-incident.usecase.ts",
         "src/application/incidents/get-incidents.usecase.ts",
         "src/application/incidents/get-incident-detail.usecase.ts",
-        "src/course-evaluation/index.ts",
         "src/domain/incidents/incident-repository.port.ts",
         "src/infrastructure/incidents/cloud-incident.repository.ts",
-        "src/infrastructure/incidents/in-memory-incident.repository.ts"
+        "src/infrastructure/incidents/in-memory-incident.repository.ts",
+        "reports/week-05/contract-tests.json"
       ],
       "tests": [
         "npx jest course-tests/public/week-05.test.ts --runInBand",
         "npm run typecheck"
       ],
-      "reviews": [],
-      "prediction": "Al separar el cliente HTTP de la interfaz y validar las respuestas remotas antes de convertirlas al dominio, las consultas y la creación podrán manejar respuestas inválidas, lentas o fallidas sin romper la aplicación.",
+      "reviews": [
+        "PR #28 creado y fusionado: implementacion de CloudIncidentRepository y conexion con casos de uso de Application"
+      ],
+      "prediction": "Al separar el cliente HTTP de la interfaz y validar las respuestas remotas antes de convertirlas al dominio, las consultas y la creacion podran manejar respuestas invalidas, lentas o fallidas sin romper la aplicacion.",
       "command": "npx jest course-tests/public/week-05.test.ts --runInBand",
       "observedResult": "PASS: 1 suite y 5 pruebas completadas correctamente.",
-      "explanation": "Se implementó CloudIncidentRepository como adaptador HTTP conectado al puerto IncidentRepository. Las respuestas pasan por parseRemoteResource antes de transformarse en entidades del dominio."
+      "explanation": "Se implemento CloudIncidentRepository como adaptador HTTP conectado al puerto IncidentRepository. Las respuestas pasan por parseRemoteResource antes de transformarse en entidades del dominio."
     },
     {
       "studentId": "Pacheco",
@@ -34,17 +62,20 @@
         "2b28a3f2a0b1c42d875aab32403a736f55c8aed8"
       ],
       "files": [
-        "course-tests/cloud-client-resilience.test.ts"
+        "course-tests/cloud-client-resilience.test.ts",
+        "reports/week-05/failure-matrix.json"
       ],
       "tests": [
-        "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
-        "npm.cmd run typecheck"
+        "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+        "npm run typecheck"
       ],
-      "reviews": [],
-      "prediction": "Las respuestas válidas producirán objetos del dominio, mientras que payload null, contrato roto, timeout y HTTP 500 producirán errores controlados sin depender de Internet público.",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
-      "observedResult": "PASS: 1 suite y 7 pruebas aprobadas; lista, detalle, creación, nullable, malformado, HTTP 500 y timeout fueron reproducidos correctamente.",
-      "explanation": "Se inyectó un fetchImpl simulado en CloudIncidentRepository para reproducir respuestas deterministas. Las pruebas verifican la traducción de respuestas válidas y la clasificación segura de fallos como domain, contract, http y timeout."
+      "reviews": [
+        "PR #30 creado y fusionado: pruebas de resiliencia con stubs deterministas y matriz de fallos"
+      ],
+      "prediction": "Las respuestas validas produciran objetos del dominio, mientras que payload null, contrato roto, timeout y HTTP 500 produciran errores controlados sin depender de Internet publico.",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "observedResult": "PASS: 1 suite y 7 pruebas aprobadas; lista, detalle, creacion, nullable, malformado, HTTP 500 y timeout fueron reproducidos correctamente.",
+      "explanation": "Se inyecto un fetchImpl simulado en CloudIncidentRepository para reproducir respuestas deterministas. Las pruebas verifican la traduccion de respuestas validas y la clasificacion segura de fallos como domain, contract, http y timeout."
     }
   ]
 }

@@ -1,63 +1,63 @@
 {
   "schemaVersion": 1,
   "week": 5,
-  "commitSha": "2b28a3f2a0b1c42d875aab32403a736f55c8aed8",
-  "generatedAt": "2026-10-04T08:08:43Z",
+  "commitSha": "5cf26502034a8383266fb29493417a40dcdee9b1",
+  "generatedAt": "2026-10-04T19:50:00Z",
   "checks": [
     {
       "id": "valid-incident-list",
       "status": "pass",
       "scenarioType": "nominal",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "La lista HTTP 200 fue traducida a un arreglo de dominio con una incidencia válida."
     },
     {
       "id": "valid-incident-detail",
       "status": "pass",
       "scenarioType": "nominal",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "El detalle HTTP 200 produjo la incidencia inc-001 con sus campos de dominio validados."
     },
     {
       "id": "valid-incident-creation",
       "status": "pass",
       "scenarioType": "nominal",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "La creación devolvió una incidencia válida y la solicitud incluyó Idempotency-Key."
     },
     {
       "id": "nullable-payload",
       "status": "pass",
       "scenarioType": "boundary",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "Un payload null no produjo datos inventados; el cliente lo convirtió en un error de dominio controlado."
     },
     {
       "id": "malformed-resource",
       "status": "pass",
       "scenarioType": "failure",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "El recurso sin version incumplió el contrato y fue rechazado con kind=contract."
     },
     {
       "id": "http-500",
       "status": "pass",
       "scenarioType": "failure",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "La respuesta simulada HTTP 500 produjo un error controlado con kind=http y status=500."
     },
     {
       "id": "request-timeout",
       "status": "pass",
       "scenarioType": "failure",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
+      "command": "npm test -- --ci --runInBand course-tests/cloud-client-resilience.test.ts",
       "evidence": "La respuesta lenta fue abortada después del límite configurado y produjo kind=timeout sin bloquear la prueba."
     },
     {
       "id": "typescript-validation",
       "status": "pass",
       "scenarioType": "nominal",
-      "command": "npm.cmd run typecheck",
+      "command": "npm run typecheck",
       "evidence": "TypeScript terminó sin errores después de agregar las pruebas de resiliencia."
     }
   ]
