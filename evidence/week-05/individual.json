@@ -1,0 +1,27 @@
+{
+    "studentId": "Alexis",
+    "commitShas": [
+      "d28107d354e18d3bc7f1ee5b857b72bbbaaf2b65"
+    ],
+    "files": [
+      "App.tsx",
+      "src/application/incidents/create-incident.usecase.ts",
+      "src/application/incidents/get-incidents.usecase.ts",
+      "src/application/incidents/get-incident-detail.usecase.ts",
+      "src/course-evaluation/index.ts",
+      "src/domain/incidents/incident-repository.port.ts",
+      "src/infrastructure/incidents/cloud-incident.repository.ts",
+      "src/infrastructure/incidents/in-memory-incident.repository.ts"
+    ],
+    "tests": [
+      "npx jest course-tests/public/week-05.test.ts --runInBand",
+      "npx jest course-tests/smoke.test.tsx course-tests/public/week-01.test.ts course-tests/public/week-02.test.ts course-tests/public/week-03.test.ts course-tests/public/week-04.test.ts course-tests/public/week-05.test.ts --runInBand",
+      "npm run typecheck",
+      "npm run lint"
+    ],
+    "reviews": [],
+    "prediction": "Al separar el cliente HTTP de la interfaz y validar las respuestas remotas antes de convertirlas al dominio, las consultas y la creación de incidencias podrán manejar respuestas inválidas, lentas o fallidas sin romper la aplicación.",
+    "command": "npx jest course-tests/public/week-05.test.ts --runInBand",
+    "observedResult": "PASS — 1 suite y 5 pruebas completadas correctamente.",
+    "explanation": "Se implementó CloudIncidentRepository como adaptador HTTP en infrastructure, conectado al puerto IncidentRepository y a los casos de uso de Application. La respuesta remota pasa por parseRemoteResource antes de transformarse en una entidad Incident, y el cliente distingue errores de contrato, dominio, HTTP, red y timeout."
+  }

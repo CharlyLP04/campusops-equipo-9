@@ -1,6 +1,17 @@
-import type { Incident } from './incident.entity';
+import type {
+  Incident,
+  IncidentCategory,
+} from './incident.entity';
+
+export type CreateIncidentInput = Readonly<{
+  category: IncidentCategory;
+  description: string;
+  location: string;
+  idempotencyKey: string;
+}>;
 
 export interface IncidentRepository {
-  findAll(): readonly Incident[];
-  findById(id: string): Incident | undefined;
+  findAll(): Promise<readonly Incident[]>;
+  findById(id: string): Promise<Incident | undefined>;
+  create(input: CreateIncidentInput): Promise<Incident>;
 }

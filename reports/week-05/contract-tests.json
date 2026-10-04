@@ -1,0 +1,43 @@
+{
+    "schemaVersion": 1,
+    "week": 5,
+    "commitSha": "d28107d354e18d3bc7f1ee5b857b72bbbaaf2b65",
+    "generatedAt": "2026-10-02T22:17:23.1489302-06:00",
+    "checks": [
+      {
+        "id": "published-dto-boundary",
+        "status": "pass",
+        "scenarioType": "boundary",
+        "command": "npx jest course-tests/public/week-05.test.ts --runInBand",
+        "evidence": "PASS — 1 suite y 5 pruebas. Se aceptan DTO válidos, incluido payload null y campos adicionales, y se rechazan id vacío, version no numérica y respuesta null."
+      },
+      {
+        "id": "ui-no-direct-http",
+        "status": "pass",
+        "scenarioType": "boundary",
+        "command": "git grep -n \"fetch(\" -- src/ui/screens",
+        "evidence": "Sin resultados. Las pantallas de UI no realizan llamadas fetch directamente."
+      },
+      {
+        "id": "application-cloud-composition",
+        "status": "pass",
+        "scenarioType": "nominal",
+        "command": "Select-String -Path .\\App.tsx -Pattern \"CloudIncidentRepository|CreateIncidentUseCase|GetIncidentsUseCase|GetIncidentDetailUseCase\"",
+        "evidence": "App.tsx instancia CloudIncidentRepository en la raíz de composición y conecta el repositorio con los casos de uso de lista, detalle y creación."
+      },
+      {
+        "id": "remote-domain-validation-path",
+        "status": "pass",
+        "scenarioType": "boundary",
+        "command": "git grep -n \"parseRemoteResource\" -- src/infrastructure/incidents src/course-evaluation",
+        "evidence": "La infraestructura utiliza parseRemoteResource antes de convertir el recurso remoto a la entidad de dominio, y la función validada está implementada en src/course-evaluation/index.ts."
+      },
+      {
+        "id": "typecheck",
+        "status": "pass",
+        "scenarioType": "nominal",
+        "command": "npm run typecheck",
+        "evidence": "PASS — tsc --noEmit finalizó sin errores."
+      }
+    ]
+  }

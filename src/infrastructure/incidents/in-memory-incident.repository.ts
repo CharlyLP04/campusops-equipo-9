@@ -50,17 +50,40 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
 ];
 
 export class InMemoryIncidentRepository implements IncidentRepositoryPort {
-  private readonly incidents: readonly Incident[];
+  private incidents: readonly Incident[];
 
   constructor(incidents: readonly Incident[] = SYNTHETIC_INCIDENTS) {
     this.incidents = incidents;
   }
 
-  findAll(): readonly Incident[] {
+  async findAll(): Promise<readonly Incident[]> {
     return [...this.incidents];
   }
 
-  findById(id: string): Incident | undefined {
+  async findById(id: string): Promise<Incident | undefined> {
     return this.incidents.find((incident) => incident.id === id);
   }
+
+  async create(input: {
+    category: Incident['category'];
+    description: string;
+    location: string;
+    idempotencyKey: string;
+  }): Promise<Incident> {
+    const incident: Incident = {
+      id: `incident-local-${this.incidents.length + 1}`,
+      reporterId: 'reporter-local',
+      category: input.category,
+      description: input.description,
+      location: {
+        source: 'manual',
+        label: input.location,
+      },
+      assignedTechnicianId: null,
+      status: 'open',
+    };
+    this.incidents = [...this.incidents, incident];
+    return incident;
+  }
+
 }

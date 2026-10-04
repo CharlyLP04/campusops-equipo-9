@@ -9,6 +9,6 @@ export class GetIncidentsUseCase {
   constructor(private readonly repository: IncidentRepository) {}
 
   async execute(): Promise<readonly Incident[]> {
-    return this.repository.findAll();
+    return await this.repository.findAll();
   }
 }
