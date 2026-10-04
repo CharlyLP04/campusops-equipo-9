@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 5,
-  "commitSha": "b0985c33b037a214b0a72b4c3df168be0a62babf",
+  "commitSha": "5cf26502034a8383266fb29493417a40dcdee9b1",
   "decision": "Se decide desacoplar estrictamente el transporte de red de las capas internas mediante un adaptador de cliente cloud que valida el DTO remoto con parseRemoteResource antes de traducirlo a entidades de Dominio, representando las anomalias de contrato, timeouts y fallos 500 como errores tipados recuperables en lugar de propagar excepciones sin control hacia la interfaz.",
   "alternatives": [
     "Alternativa A: Consumir las respuestas crudas del backend directamente en los componentes de UI y hooks mediante fetch, manejando errores con bloques try/catch locales sin validacion formal de esquema.",
