@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "commitSha": "62f42cf0d898f7c2d7c1fed0daf186344102cde6",
+  "decision": "Se decide implementar un coordinador de sesión centralizado con política single-flight (coalescencia de renovaciones) para ráfagas concurrentes de respuestas 401, reintentos acotados a un solo intento por solicitud, y transición segura al estado anónimo con revocación y purga atómica de credenciales en SecureStore ante fallo de renovación o logout.",
+  "alternatives": [
+    "Alternativa A: Manejar cada error 401 de forma independiente en cada solicitud o pantalla, permitiendo que múltiples peticiones simultáneas disparen llamadas duplicadas e independientes al endpoint de refresh (/v1/session/refresh), arriesgando condiciones de carrera y bucles infinitos de renovación.",
+    "Alternativa B: Coordinar centralizadamente el ciclo de sesión mediante SessionCoordinator bajo el patrón single-flight, de modo que el primer 401 dispare una sola llamada de renovación compartida mientras las peticiones concurrentes se encolan, reintentando cada una exactamente una vez tras el éxito, o purgando tokens en SecureStore y transitando limpiamente a estado no autenticado si la renovación falla."
+  ],
+  "tradeoff": "Beneficio: Eliminación garantizada de tormentas de peticiones y bucles de renovación concurrentes ante expiración de tokens, asegurando la consistencia del estado de autenticación y la limpieza segura de secretos en el cliente. Costo: Requiere sincronización de estado, cola temporal de identificadores de solicitud en memoria y control de generaciones activas para evitar reprocesar peticiones desfasadas.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npm test -- course-tests/public/week-06.test.ts",
+      "result": "PASS: 2 pruebas públicas de coalescencia concurrente y purga en logout aprobadas.",
+      "evidence": "coordinateRefresh coalesció 3 peticiones 401 concurrentes (generación 0) en exactamente 1 llamada de refresh, reintentó cada petición una sola vez tras refreshSucceeded, y el evento logout eliminó completamente el token persistido retornando persistedToken: null."
+    },
+    {
+      "command": "npm test -- course-tests/session-coordination.test.ts",
+      "result": "PASS: 8 pruebas unitarias de concurrencia, fallo seguro y autorización de perfiles aprobadas.",
+      "evidence": "Se comprobó la transición segura a estado anónimo ante refreshFailed sin reintentos erróneos, la tolerancia a peticiones desfasadas sin duplicar refresh, y el control estricto de permisos para reportante, técnico y coordinador."
+    }
+  ]
+}
