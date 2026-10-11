@@ -1,0 +1,71 @@
+{
+    "schemaVersion":  1,
+    "week":  6,
+    "commitSha":  "2fac911dcbf3d4e7f1dfe8abfaf5c1a22d110b22",
+    "generatedAt":  "2026-10-10T22:02:00.3252300-06:00",
+    "checks":  [
+                   {
+                       "id":  "session-auth-lifecycle",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm test -- --runInBand course-tests/session-auth.test.ts",
+                       "evidence":  "5 pruebas aprobadas: login, expiración con reloj controlado, renovación correcta, fallo de renovación y logout."
+                   },
+                   {
+                       "id":  "session-restoration",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm test -- --runInBand course-tests/session-restoration.test.ts",
+                       "evidence":  "4 pruebas aprobadas: restauración vigente, sesión vencida, rol inconsistente y documento malformado."
+                   },
+                   {
+                       "id":  "rbac-domain",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm test -- --runInBand course-tests/auth-rbac.test.ts",
+                       "evidence":  "6 pruebas aprobadas para perfiles, consulta de incidencias, creación y acciones autorizadas."
+                   },
+                   {
+                       "id":  "rbac-application-enforcement",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm test -- --runInBand course-tests/incident-rbac-usecases.test.ts",
+                       "evidence":  "8 pruebas aprobadas, incluyendo rechazo sin sesión, identidad con rol falsificado y acceso fuera del alcance."
+                   },
+                   {
+                       "id":  "expo-secure-storage-adapter",
+                       "status":  "pass",
+                       "scenarioType":  "failure",
+                       "command":  "npm test -- --runInBand course-tests/expo-secure-storage.adapter.test.ts",
+                       "evidence":  "6 pruebas aprobadas para lectura, escritura, eliminación, claves no admitidas y sanitización de errores mediante API simulada."
+                   },
+                   {
+                       "id":  "auth-regression-suite",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "npm test -- --runInBand course-tests/secure-storage.test.ts course-tests/expo-secure-storage.adapter.test.ts course-tests/auth-rbac.test.ts course-tests/session-auth.test.ts course-tests/session-restoration.test.ts course-tests/incident-rbac-usecases.test.ts course-tests/cloud-contract-validation.test.ts course-tests/cloud-client-resilience.test.ts course-tests/smoke.test.tsx course-tests/incident-list-screen.test.tsx",
+                       "evidence":  "10 suites aprobadas, 59 pruebas aprobadas. La suite de interfaz mostró advertencias de act, pero terminó correctamente."
+                   },
+                   {
+                       "id":  "typescript",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm run typecheck",
+                       "evidence":  "tsc --noEmit terminó sin errores."
+                   },
+                   {
+                       "id":  "lint",
+                       "status":  "pass",
+                       "scenarioType":  "nominal",
+                       "command":  "npm run lint",
+                       "evidence":  "ESLint terminó sin errores ni advertencias después de limpiar el formato."
+                   },
+                   {
+                       "id":  "diff-check",
+                       "status":  "pass",
+                       "scenarioType":  "boundary",
+                       "command":  "git diff --check",
+                       "evidence":  "Terminó sin errores de espacios en blanco ni líneas vacías adicionales."
+                   }
+               ]
+}
