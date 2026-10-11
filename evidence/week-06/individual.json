@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "teamId": "equipo-9",
+  "members": [
+    {
+      "studentId": "Carlos",
+      "name": "Carlos Olaya Gutiérrez",
+      "commitShas": [
+        "62f42cf0d898f7c2d7c1fed0daf186344102cde6"
+      ],
+      "files": [
+        "src/domain/auth/session-coordinator.ts",
+        "src/domain/auth/session.types.ts",
+        "src/course-evaluation/index.ts",
+        "course-tests/session-coordination.test.ts",
+        "evidence/week-06/engineering.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/public/week-06.test.ts",
+        "npm test -- course-tests/session-coordination.test.ts"
+      ],
+      "reviews": [
+        "Implementación revisada durante la integración de Semana 6."
+      ],
+      "prediction": "Al centralizar las respuestas 401 mediante single-flight, varias solicitudes concurrentes compartirán una sola renovación y cada petición se reintentará como máximo una vez.",
+      "command": "npm test -- course-tests/session-coordination.test.ts",
+      "observedResult": "PASS — coordinación concurrente, generaciones de sesión, fallo seguro y logout verificados.",
+      "explanation": "Implementó SessionCoordinator para agrupar solicitudes 401, controlar generaciones, evitar renovaciones duplicadas y regresar a estado anónimo cuando falla el refresh."
+    },
+    {
+      "studentId": "Alexis",
+      "name": "Alexis Montalvo Osorio",
+      "commitShas": [
+        "2fac911dcbf3d4e7f1dfe8abfaf5c1a22d110b22"
+      ],
+      "files": [
+        "src/domain/auth/role-authorization.ts",
+        "src/domain/auth/session-identity.port.ts",
+        "src/domain/auth/session.types.ts",
+        "src/infrastructure/auth/expo-secure-storage.adapter.ts",
+        "src/infrastructure/auth/session-auth.service.ts",
+        "course-tests/auth-rbac.test.ts",
+        "course-tests/session-auth.test.ts",
+        "course-tests/session-restoration.test.ts",
+        "course-tests/incident-rbac-usecases.test.ts",
+        "reports/week-06/auth-tests.json"
+      ],
+      "tests": [
+        "npm test -- course-tests/auth-rbac.test.ts",
+        "npm test -- course-tests/session-auth.test.ts",
+        "npm test -- course-tests/session-restoration.test.ts",
+        "npm test -- course-tests/incident-rbac-usecases.test.ts"
+      ],
+      "reviews": [
+        "Implementación revisada durante la integración de Semana 6."
+      ],
+      "prediction": "La sesión utilizará almacenamiento seguro, expiración mediante reloj controlable y autorización de dominio para impedir acciones no permitidas por el perfil.",
+      "command": "npm test -- course-tests/auth-rbac.test.ts course-tests/session-auth.test.ts course-tests/session-restoration.test.ts course-tests/incident-rbac-usecases.test.ts",
+      "observedResult": "PASS — autenticación, restauración, expiración y permisos RBAC verificados.",
+      "explanation": "Implementó el ciclo de sesión con SecureStore y validó en dominio los permisos de reportante, técnico y coordinador sin depender únicamente de la interfaz."
+    },
+    {
+      "studentId": "Pacheco",
+      "name": "Carlos Alberto Pacheco Avila",
+      "commitShas": [
+        "758e8436c68d27fc99c2f9753a0ccf03a899d513"
+      ],
+      "files": [
+        "course-tests/auth-concurrency.test.ts",
+        "reports/week-06/concurrency.json"
+      ],
+      "tests": [
+        "npm.cmd test -- --ci --runInBand course-tests/auth-concurrency.test.ts",
+        "npm.cmd run typecheck"
+      ],
+      "reviews": [
+        "Integración comprobada con las implementaciones de sesión segura, RBAC y coordinación single-flight."
+      ],
+      "prediction": "Una ráfaga concurrente de respuestas 401 debe generar exactamente un refresh compartido, reintentar cada solicitud una sola vez y limpiar la sesión sin ciclos infinitos si la renovación falla.",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/auth-concurrency.test.ts",
+      "observedResult": "PASS — 1 suite y 5 pruebas aprobadas; typecheck sin errores.",
+      "explanation": "Diseñó pruebas deterministas con ráfagas de 25 y 50 solicitudes para verificar deduplicación del refresh, reintentos limitados, manejo de respuestas atrasadas, fallo seguro y eliminación de la sesión persistida durante logout."
+    }
+  ]
+}
