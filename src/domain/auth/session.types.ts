@@ -1,4 +1,14 @@
-import type { CampusOpsActorId, CampusOpsRole } from './role-authorization';
+import type {
+  CampusOpsActorId,
+  CampusOpsRole,
+  IncidentAction,
+} from './role-authorization';
+
+export type {
+  CampusOpsActorId,
+  CampusOpsRole,
+  IncidentAction,
+};
 
 export type SessionStatus =
   | 'anonymous'
@@ -7,7 +17,9 @@ export type SessionStatus =
   | 'expired';
 
 export type SessionSnapshot =
-  | Readonly<{ status: 'anonymous' }>
+  | Readonly<{
+      status: 'anonymous';
+    }>
   | Readonly<{
       status: 'authenticated' | 'refreshing' | 'expired';
       actorId: CampusOpsActorId;
@@ -29,14 +41,6 @@ export type SessionClock = Readonly<{
   now: () => number;
 }>;
 
-/**
- * Tipos de dominio para autenticación, autorización y ciclo de vida de sesión en CampusOps.
- */
-
-export type CampusOpsRole = 'reporter' | 'technician' | 'coordinator';
-
-export type SessionStatus = 'anonymous' | 'authenticated';
-
 export interface AuthSession {
   readonly actorId: string;
   readonly role: CampusOpsRole;
@@ -46,18 +50,8 @@ export interface AuthSession {
   readonly generation: number;
 }
 
-export type IncidentAction =
-  | 'assign'
-  | 'prioritize'
-  | 'start'
-  | 'resolve'
-  | 'close'
-  | 'reopen'
-  | 'comment'
-  | 'add_evidence';
-
 export interface SessionCoordinatorSummary {
-  readonly status: SessionStatus;
+  readonly status: 'anonymous' | 'authenticated';
   readonly activeGeneration: number | null;
   readonly refreshCalls: number;
   readonly retriedRequestIds: readonly string[];

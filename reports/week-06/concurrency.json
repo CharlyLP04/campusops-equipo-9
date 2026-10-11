@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "week": 6,
+  "owner": "Carlos Alberto Pacheco Avila",
+  "role": "QA de concurrencia y resiliencia",
+  "generatedAt": "2026-10-11T08:07:53Z",
+  "command": "npm.cmd test -- --ci --runInBand course-tests/auth-concurrency.test.ts",
+  "overallStatus": "pass",
+  "summary": {
+    "testSuitesPassed": 1,
+    "testsPassed": 5,
+    "testsFailed": 0,
+    "typecheckPassed": true,
+    "refreshDeduplicated": true,
+    "infiniteLoopsDetected": false,
+    "persistedSessionRemovedOnLogout": true
+  },
+  "scenarios": [
+    {
+      "id": "concurrent_401_burst",
+      "type": "nominal",
+      "description": "Ráfaga de 25 solicitudes que reciben 401 con la misma generación.",
+      "expected": "Las solicitudes comparten exactamente una llamada de refresh.",
+      "observed": "refreshCalls fue 1 y las 25 solicitudes fueron reintentadas.",
+      "status": "pass"
+    },
+    {
+      "id": "queued_request_deduplication",
+      "type": "boundary",
+      "description": "Una misma solicitud aparece repetida mientras espera la renovación.",
+      "expected": "Cada identificador debe reintentarse como máximo una vez.",
+      "observed": "Los identificadores list, detail y create aparecieron una sola vez en los reintentos.",
+      "status": "pass"
+    },
+    {
+      "id": "failed_refresh_burst",
+      "type": "failure",
+      "description": "Ráfaga de 50 respuestas 401 seguida de un refresh fallido.",
+      "expected": "La sesión debe pasar a anonymous sin reintentos ni ciclos infinitos.",
+      "observed": "Se realizó un refresh, no hubo reintentos y el token persistido quedó en null.",
+      "status": "pass"
+    },
+    {
+      "id": "stale_401_response",
+      "type": "boundary",
+      "description": "Una respuesta 401 de generación anterior llega después de una renovación exitosa.",
+      "expected": "La respuesta atrasada debe reintentarse sin iniciar otro refresh.",
+      "observed": "refreshCalls permaneció en 1 y la solicitud atrasada fue reintentada.",
+      "status": "pass"
+    },
+    {
+      "id": "logout_storage_cleanup",
+      "type": "security",
+      "description": "Cierre de sesión con credenciales sintéticas previamente almacenadas.",
+      "expected": "El estado debe quedar anonymous y el documento de sesión debe eliminarse.",
+      "observed": "La sesión quedó anonymous y la clave campusops.auth.session.v1 fue eliminada.",
+      "status": "pass"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- --ci --runInBand course-tests/auth-concurrency.test.ts",
+      "result": "PASS - 1 suite, 5 tests"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS - TypeScript completed without errors"
+    }
+  ]
+}
