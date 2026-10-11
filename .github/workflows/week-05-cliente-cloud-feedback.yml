@@ -4,7 +4,8 @@ name: Week 05 Academic Feedback
 
 on:
   push:
-  pull_request:
+    tags:
+      - week-05-final
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,46 @@
+stateDiagram-v2
+    [*] --> Anonymous: Inicialización de la aplicación
+
+    state Anonymous {
+        [*] --> NoSession
+        NoSession: Sin tokens persistidos
+        NoSession: Peticiones públicas o no autenticadas
+    }
+
+    Anonymous --> Authenticating: LOGIN_REQUEST (actorId, credenciales)
+
+    state Authenticating {
+        [*] --> Verifying
+        Verifying: Validación en /v1/session/login
+    }
+
+    Authenticating --> Authenticated: LOGIN_SUCCESS (tokens recibidos, guardados en SecureStore)
+    Authenticating --> Anonymous: LOGIN_FAILURE (credenciales inválidas o error de red)
+
+    state Authenticated {
+        [*] --> ActiveSession
+        ActiveSession: Token válido en memoria y almacenamiento seguro
+        ActiveSession: Peticiones HTTP con Authorization Bearer
+    }
+
+    Authenticated --> Refreshing: HTTP_401_RECEIVED (token expirado)
+
+    state Refreshing {
+        [*] --> SingleFlightRefresh
+        SingleFlightRefresh: Una sola llamada activa a /v1/session/refresh
+        SingleFlightRefresh: Solicitudes concurrentes adicionales se encolan sin duplicar refresh
+    }
+
+    Refreshing --> Authenticated: REFRESH_SUCCESS (nuevo token, generación incrementada, reintento de peticiones encoladas)
+    Refreshing --> Anonymous: REFRESH_FAILURE (token de refresco inválido o expirado -> SecureStore limpiado)
+
+    Authenticated --> LoggedOut: LOGOUT_REQUEST
+    Refreshing --> LoggedOut: LOGOUT_REQUEST (cancelación de operaciones)
+
+    state LoggedOut {
+        [*] --> ClearingState
+        ClearingState: Eliminación de tokens en SecureStore
+        ClearingState: Reset de memoria y colas de reintento
+    }
+
+    LoggedOut --> Anonymous: Estado limpio y seguro
