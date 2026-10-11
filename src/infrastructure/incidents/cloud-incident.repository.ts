@@ -1,4 +1,4 @@
-﻿import {
+import {
     parseRemoteResource,
   } from '../../course-evaluation';
 
@@ -16,13 +16,17 @@
   type FetchLike = typeof fetch;
 
   type CloudIncidentRepositoryOptions = Readonly<{
-    baseUrl?: string;
-    accessToken?: string;
-    actorId?: string;
-    timeoutMs?: number;
-    scenario?: string;
-    fetchImpl?: FetchLike;
-  }>;
+  baseUrl?: string;
+  accessToken?: string;
+  actorId?: string;
+  timeoutMs?: number;
+  scenario?: string;
+  fetchImpl?: FetchLike;
+  credentialsProvider?: () => Readonly<{
+    accessToken: string;
+    actorId: string;
+  }> | null;
+}>;
 
   export type CloudIncidentErrorKind =
     | 'timeout'
@@ -170,6 +174,7 @@
     private readonly timeoutMs: number;
     private readonly scenario: string | undefined;
     private readonly fetchImpl: FetchLike;
+    private readonly credentialsProvider: CloudIncidentRepositoryOptions['credentialsProvider'];
 
     constructor(options: CloudIncidentRepositoryOptions = {}) {
       this.baseUrl =
@@ -190,6 +195,7 @@
       this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
       this.scenario = options.scenario;
       this.fetchImpl = options.fetchImpl ?? globalThis.fetch;
+      this.credentialsProvider = options.credentialsProvider;
     }
 
     private async request(
@@ -206,10 +212,23 @@
         controller.abort();
       }, this.timeoutMs);
 
+      const credentials = this.credentialsProvider?.() ?? null;
+
+      if (this.credentialsProvider && !credentials) {
+        throw new CloudIncidentError(
+          'http',
+          'An authenticated session is required.',
+          401,
+        );
+      }
+
+      const requestAccessToken = credentials?.accessToken ?? this.accessToken;
+      const requestActorId = credentials?.actorId ?? this.actorId;
+
       const headers: Record<string, string> = {
         Accept: 'application/json',
-        Authorization: `Bearer ${this.accessToken}`,
-        'X-Course-Actor': this.actorId,
+        Authorization: `Bearer ${requestAccessToken}`,
+        'X-Course-Actor': requestActorId,
       };
 
       if (options.body !== undefined) {
