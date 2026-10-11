@@ -1,4 +1,3 @@
-
 export type CampusOpsActorId =
   | 'reporter-1'
   | 'reporter-2'
@@ -6,12 +5,10 @@ export type CampusOpsActorId =
   | 'technician-2'
   | 'coordinator-1';
 
-export type CampusOpsRole = 'reporter' | 'technician' | 'coordinator';
-
-export type IncidentForAuthorization = Readonly<{
-  reporterId: string;
-  assignedTechnicianId: string | null;
-}>;
+export type CampusOpsRole =
+  | 'reporter'
+  | 'technician'
+  | 'coordinator';
 
 export type IncidentAction =
   | 'start'
@@ -21,7 +18,13 @@ export type IncidentAction =
   | 'close'
   | 'reopen'
   | 'comment'
-  | 'addEvidence';
+  | 'addEvidence'
+  | 'add_evidence';
+
+export interface IncidentForAuthorization {
+  readonly reporterId: string;
+  readonly assignedTechnicianId: string | null;
+}
 
 const ACTOR_ROLES: Readonly<Record<CampusOpsActorId, CampusOpsRole>> = {
   'reporter-1': 'reporter',
@@ -31,10 +34,6 @@ const ACTOR_ROLES: Readonly<Record<CampusOpsActorId, CampusOpsRole>> = {
   'coordinator-1': 'coordinator',
 };
 
-/**
- * Resuelve el perfil desde una identidad conocida.
- * No acepta el rol enviado por la interfaz como fuente de autoridad.
- */
 export function roleForActor(actorId: string): CampusOpsRole | null {
   if (!Object.prototype.hasOwnProperty.call(ACTOR_ROLES, actorId)) {
     return null;
@@ -43,99 +42,121 @@ export function roleForActor(actorId: string): CampusOpsRole | null {
   return ACTOR_ROLES[actorId as CampusOpsActorId];
 }
 
-/** Solo los perfiles reportantes pueden registrar incidencias. */
-export function canCreateIncident(actorId: string): boolean {
-  return roleForActor(actorId) === 'reporter';
+function resolveRole(value: string): CampusOpsRole | null {
+  if (
+    value === 'reporter' ||
+    value === 'technician' ||
+    value === 'coordinator'
+  ) {
+    return value;
+  }
+
+  return roleForActor(value);
 }
 
-/**
- * Un reportante consulta sus propias incidencias; un técnico consulta
- * las que tiene asignadas; coordinación puede consultar todas.
- */
+export function canCreateIncident(
+  actorIdOrRole: string,
+): boolean {
+  return resolveRole(actorIdOrRole) === 'reporter';
+}
+
 export function canViewIncident(
   actorId: string,
   incident: IncidentForAuthorization,
-): boolean {
-  const role = roleForActor(actorId);
+): boolean;
 
-  if (role === 'coordinator') {
-    return true;
-  }
-
-  if (role === 'reporter') {
-    return incident.reporterId === actorId;
-  }
-
-  if (role === 'technician') {
-    return incident.assignedTechnicianId === actorId;
-  }
-
-
-import type { CampusOpsRole, IncidentAction } from './session.types';
-
-export interface IncidentContext {
-  readonly reporterId: string;
-  readonly assignedTechnicianId: string | null;
-}
-
-export const COORDINATOR_ACTIONS: ReadonlySet<IncidentAction> = new Set([
-  'assign',
-  'prioritize',
-  'close',
-  'reopen',
-]);
-
-export const TECHNICIAN_ACTIONS: ReadonlySet<IncidentAction> = new Set([
-  'start',
-  'resolve',
-]);
-
-export const SHARED_ACTIONS: ReadonlySet<IncidentAction> = new Set([
-  'comment',
-  'add_evidence',
-]);
-
-/**
- * Valida si un actor tiene visibilidad de lectura sobre una incidencia dada.
- */
 export function canViewIncident(
   role: CampusOpsRole,
   actorId: string,
-  incident: IncidentContext,
+  incident: IncidentForAuthorization,
+): boolean;
+
+export function canViewIncident(
+  first: string,
+  second: string | IncidentForAuthorization,
+  third?: IncidentForAuthorization,
 ): boolean {
+  const role =
+    typeof second === 'string'
+      ? resolveRole(first)
+      : roleForActor(first);
+
+  const actorId =
+    typeof second === 'string'
+      ? second
+      : first;
+
+  const incident =
+    typeof second === 'string'
+      ? third
+      : second;
+
+  if (!role || !incident) {
+    return false;
+  }
+
   if (role === 'coordinator') {
     return true;
   }
+
   if (role === 'reporter') {
     return incident.reporterId === actorId;
   }
+
   if (role === 'technician') {
     return incident.assignedTechnicianId === actorId;
   }
+
   return false;
 }
 
-/**
-
- * Autoriza acciones de dominio a partir de la identidad del actor
- * y de la incidencia objetivo, no de la visibilidad de los controles.
- */
 export function canPerformIncidentAction(
   actorId: string,
   action: IncidentAction,
   incident: IncidentForAuthorization,
-): boolean {
-  const role = roleForActor(actorId);
+): boolean;
 
-  if (!role) {
+export function canPerformIncidentAction(
+  role: CampusOpsRole,
+  actorId: string,
+  action: IncidentAction,
+  incident: IncidentForAuthorization,
+): boolean;
+
+export function canPerformIncidentAction(
+  first: string,
+  second: string,
+  third: IncidentAction | IncidentForAuthorization,
+  fourth?: IncidentForAuthorization,
+): boolean {
+  const explicitRole = fourth !== undefined;
+
+  const role = explicitRole
+    ? resolveRole(first)
+    : roleForActor(first);
+
+  const actorId = explicitRole
+    ? second
+    : first;
+
+  const action = explicitRole
+    ? (third as IncidentAction)
+    : (second as IncidentAction);
+
+  const incident = explicitRole
+    ? fourth
+    : (third as IncidentForAuthorization);
+
+  if (!role || !incident) {
     return false;
   }
 
-  if (action === 'close' || action === 'reopen') {
-    return role === 'coordinator';
-  }
-
-  if (action === 'assign' || action === 'prioritize') {
+  if (
+    action === 'assign' ||
+    action === 'prioritize' ||
+    action === 'close' ||
+    action === 'reopen'
+  ) {
     return role === 'coordinator';
   }
 
@@ -146,37 +167,14 @@ export function canPerformIncidentAction(
     );
   }
 
-  if (action === 'comment' || action === 'addEvidence') {
-    return canViewIncident(actorId, incident);
-
- * Valida si un actor puede crear una nueva incidencia.
- */
-export function canCreateIncident(role: CampusOpsRole): boolean {
-  return role === 'reporter';
-}
-
-/**
- * Valida si un actor tiene autorización para ejecutar una acción específica sobre una incidencia.
- * Esta validación a nivel de dominio asegura que no se dependa únicamente de ocultar botones en la UI.
- */
-export function canPerformIncidentAction(
-  role: CampusOpsRole,
-  actorId: string,
-  action: IncidentAction,
-  incident: IncidentContext,
-): boolean {
-  const isVisible = canViewIncident(role, actorId, incident);
-
-  if (COORDINATOR_ACTIONS.has(action)) {
-    return role === 'coordinator';
-  }
-
-  if (TECHNICIAN_ACTIONS.has(action)) {
-    return role === 'technician' && isVisible;
-  }
-
-  if (SHARED_ACTIONS.has(action)) {
-    return isVisible;
+  if (
+    action === 'comment' ||
+    action === 'addEvidence' ||
+    action === 'add_evidence'
+  ) {
+    return explicitRole
+      ? canViewIncident(role, actorId, incident)
+      : canViewIncident(actorId, incident);
   }
 
   return false;

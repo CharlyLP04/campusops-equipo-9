@@ -1,5 +1,7 @@
 import type { AuthEvent } from '../../course-evaluation/contracts';
-import type { SessionCoordinatorSummary, SessionStatus } from './session.types';
+import type {
+  SessionCoordinatorSummary,
+} from './session.types';
 
 /**
  * Coordinador de sesión concurrente con política single-flight.
@@ -12,7 +14,7 @@ import type { SessionCoordinatorSummary, SessionStatus } from './session.types';
  * eliminan los tokens persistidos.
  */
 export class SessionCoordinator {
-  private status: SessionStatus = 'anonymous';
+  private status: 'anonymous' | 'authenticated' = 'anonymous';
   private activeGeneration: number | null = null;
   private refreshCalls = 0;
   private refreshInProgress = false;
