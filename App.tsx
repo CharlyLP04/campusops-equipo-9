@@ -15,6 +15,7 @@ import { SessionAuthService } from './src/infrastructure/auth/session-auth.servi
 
 import { GetIncidentsUseCase } from './src/application/incidents/get-incidents.usecase';
 import { GetIncidentDetailUseCase } from './src/application/incidents/get-incident-detail.usecase';
+import { CreateIncidentUseCase } from './src/application/incidents/create-incident.usecase';
 
 import { IncidentListScreen } from './src/ui/screens/IncidentListScreen';
 import { IncidentDetailScreen } from './src/ui/screens/IncidentDetailScreen';
@@ -53,6 +54,10 @@ const getIncidentsUseCase = new GetIncidentsUseCase(
   sessionIdentity,
 );
 const getIncidentDetailUseCase = new GetIncidentDetailUseCase(
+  repository,
+  sessionIdentity,
+);
+const createIncidentUseCase = new CreateIncidentUseCase(
   repository,
   sessionIdentity,
 );
@@ -274,6 +279,7 @@ export default function App() {
           {selectedIncidentId === null ? (
             <IncidentListScreen
               getIncidentsUseCase={getIncidentsUseCase}
+              createIncidentUseCase={createIncidentUseCase}
               onSelectIncident={(id) => setSelectedIncidentId(id)}
             />
           ) : (

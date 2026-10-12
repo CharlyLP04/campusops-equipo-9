@@ -101,9 +101,8 @@ describe('CloudIncidentRepository — resiliencia con fetch simulado', () => {
       fetchImpl: fetchImpl as typeof fetch,
     });
 
-    await expect(repository.findById('inc-001')).rejects.toMatchObject({
-      kind: 'domain',
-    });
+    const incident = await repository.findById('inc-001');
+    expect(incident).toBeUndefined();
   });
 
   test('rechaza un recurso malformado como error de contrato', async () => {

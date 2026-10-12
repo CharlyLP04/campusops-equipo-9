@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import { GetIncidentsUseCase } from '../../application/incidents/get-incidents.usecase';
+import { CreateIncidentUseCase } from '../../application/incidents/create-incident.usecase';
 import {
   INCIDENT_CATEGORY_LABELS,
   INCIDENT_STATUS_LABELS,
@@ -43,15 +44,18 @@ function getBadgeColor(status: IncidentStatus): BadgeColor {
 interface IncidentListScreenProps {
   getIncidentsUseCase: GetIncidentsUseCase;
   onSelectIncident: (id: string) => void;
+  createIncidentUseCase?: CreateIncidentUseCase;
 }
 
 export function IncidentListScreen({
   getIncidentsUseCase,
   onSelectIncident,
+  createIncidentUseCase,
 }: IncidentListScreenProps) {
   const [incidents, setIncidents] = useState<readonly Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const loadIncidents = useCallback(() => {
     setLoading(true);
@@ -69,6 +73,27 @@ export function IncidentListScreen({
         setLoading(false);
       });
   }, [getIncidentsUseCase]);
+
+  const handleCreateIncident = useCallback(() => {
+    if (!createIncidentUseCase || creating) return;
+    setCreating(true);
+    createIncidentUseCase
+      .execute({
+        category: 'connectivity',
+        description: `Incidencia rápida #${Date.now().toString().slice(-4)}`,
+        location: 'Edificio Central',
+        idempotencyKey: `op-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      })
+      .then(() => {
+        loadIncidents();
+      })
+      .catch(() => {
+        // En caso de que el rol activo no sea reportante
+      })
+      .finally(() => {
+        setCreating(false);
+      });
+  }, [createIncidentUseCase, creating, loadIncidents]);
 
   useEffect(() => {
     let active = true;
@@ -185,10 +210,27 @@ export function IncidentListScreen({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>CampusOps</Text>
-        <Text style={styles.headerSubtitle}>
-          Incidencias activas — {incidents.length} registradas
-        </Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.headerTitle}>CampusOps</Text>
+            <Text style={styles.headerSubtitle}>
+              Incidencias activas — {incidents.length} registradas
+            </Text>
+          </View>
+          {createIncidentUseCase ? (
+            <TouchableOpacity
+              testID="create-incident-button"
+              accessibilityRole="button"
+              style={styles.createButton}
+              onPress={handleCreateIncident}
+              disabled={creating}
+            >
+              <Text style={styles.createButtonText}>
+                {creating ? 'Creando...' : '+ Nueva'}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       {incidents.length === 0 ? (
@@ -232,6 +274,22 @@ const styles = StyleSheet.create({
     paddingTop: 56,
     paddingBottom: 20,
     paddingHorizontal: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  createButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  createButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
   headerTitle: {
     fontSize: 26,
