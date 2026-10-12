@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 6,
-  "commitSha": "1e9492c422e3f123ddb164078ec442965fa62341",
+  "commitSha": "47975d606390d33e1020e1858a58c586b3fd1e2e",
   "decision": "Se decide implementar un coordinador de sesión centralizado con política single-flight (coalescencia de renovaciones) para ráfagas concurrentes de respuestas 401, reintentos acotados a un solo intento por solicitud, y transición segura al estado anónimo con revocación y purga atómica de credenciales en SecureStore ante fallo de renovación o logout.",
   "alternatives": [
     "Alternativa A: Manejar cada error 401 de forma independiente en cada solicitud o pantalla, permitiendo que múltiples peticiones simultáneas disparen llamadas duplicadas e independientes al endpoint de refresh (/v1/session/refresh), arriesgando condiciones de carrera y bucles infinitos de renovación.",
