@@ -100,7 +100,7 @@ import {
     );
   }
 
-  function toDomainIncident(input: unknown): Incident {
+  function toDomainIncident(input: unknown): Incident | null {
     const parsed = parseRemoteResource(input);
 
     if (!parsed.ok) {
@@ -113,10 +113,7 @@ import {
     const { id, status, payload } = parsed.value;
 
     if (payload === null) {
-      throw new CloudIncidentError(
-        'domain',
-        'Remote incident payload is null and cannot be converted to an Incident.',
-      );
+      return null;
     }
 
     const category = payload.category;
@@ -301,7 +298,9 @@ import {
         method: 'GET',
       });
 
-      return getResponseItems(body).map(toDomainIncident);
+      return getResponseItems(body)
+        .map(toDomainIncident)
+        .filter((item): item is Incident => item !== null);
     }
 
     async findById(id: string): Promise<Incident | undefined> {
@@ -312,7 +311,8 @@ import {
           method: 'GET',
         });
 
-        return toDomainIncident(body);
+        const incident = toDomainIncident(body);
+        return incident ?? undefined;
       } catch (error) {
         if (
           error instanceof CloudIncidentError &&
@@ -355,6 +355,13 @@ import {
         );
       }
 
-      return toDomainIncident(body.incident);
+      const created = toDomainIncident(body.incident);
+      if (!created) {
+        throw new CloudIncidentError(
+          'contract',
+          'Create incident response contained null payload.',
+        );
+      }
+      return created;
     }
   }
