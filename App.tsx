@@ -7,6 +7,7 @@ import type { SessionIdentityPort } from './src/domain/auth/session-identity.por
 import type {
   CampusOpsActorId,
 } from './src/domain/auth/role-authorization';
+import type { Incident } from './src/domain/incidents/incident.entity';
 import type { SessionStatus } from './src/domain/auth/session.types';
 
 import { CloudIncidentRepository } from './src/infrastructure/incidents/cloud-incident.repository';
@@ -16,6 +17,11 @@ import { SessionAuthService } from './src/infrastructure/auth/session-auth.servi
 import { GetIncidentsUseCase } from './src/application/incidents/get-incidents.usecase';
 import { GetIncidentDetailUseCase } from './src/application/incidents/get-incident-detail.usecase';
 import { CreateIncidentUseCase } from './src/application/incidents/create-incident.usecase';
+import { EnqueueIncidentActionUseCase } from './src/application/sync/enqueue-incident-action.usecase';
+import { GetOfflineQueueSummaryUseCase, type OfflineQueueSummary } from './src/application/sync/get-offline-queue-summary.usecase';
+import { SyncService } from './src/application/sync/sync.service';
+import { HttpSyncRemote } from './src/infrastructure/sync/http-sync-remote';
+import { SqliteOfflineQueue } from './src/infrastructure/sync/sqlite-offline-queue';
 
 import { IncidentListScreen } from './src/ui/screens/IncidentListScreen';
 import { IncidentDetailScreen } from './src/ui/screens/IncidentDetailScreen';
@@ -61,6 +67,24 @@ const createIncidentUseCase = new CreateIncidentUseCase(
   repository,
   sessionIdentity,
 );
+const offlineQueue = isTestEnvironment ? null : new SqliteOfflineQueue();
+const queueSummaryUseCase = offlineQueue
+  ? new GetOfflineQueueSummaryUseCase(offlineQueue)
+  : null;
+const enqueueIncidentActionUseCase = offlineQueue
+  ? new EnqueueIncidentActionUseCase(
+      offlineQueue,
+      () => `offline-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`,
+    )
+  : null;
+const syncService = offlineQueue
+  ? new SyncService(
+      offlineQueue,
+      new HttpSyncRemote({
+        accessTokenProvider: () => sessionAuthService.getAccessToken(),
+      }),
+    )
+  : null;
 const EVALUATION_ACTORS: readonly {
   id: CampusOpsActorId;
   label: string;
@@ -85,6 +109,18 @@ export default function App() {
     !isTestEnvironment,
   );
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
+  const [queueSummary, setQueueSummary] = useState<OfflineQueueSummary | null>(null);
+  const [queueMessage, setQueueMessage] = useState<string | null>(null);
+
+  const refreshQueueSummary = async () => {
+    if (!queueSummaryUseCase) return;
+    try {
+      setQueueSummary(await queueSummaryUseCase.execute());
+      setQueueMessage(null);
+    } catch {
+      setQueueMessage('No se pudo recuperar la cola local.');
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -101,6 +137,80 @@ export default function App() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void refreshQueueSummary();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const enqueueStartAttention = async (
+    incident: Incident,
+    payload: Readonly<Record<string, unknown>>,
+  ) => {
+    const identity = sessionIdentity.getAuthenticatedIdentity();
+
+    if (
+      !identity ||
+      !enqueueIncidentActionUseCase ||
+      incident.version === undefined
+    ) {
+      throw new Error('No existe una identidad o versión válida para encolar.');
+    }
+
+    const knownIncident = {
+      id: incident.id,
+      version: incident.version,
+      reporterId: incident.reporterId,
+      assignedTechnicianId: incident.assignedTechnicianId,
+      status: incident.status,
+    };
+
+    const note =
+      typeof payload.note === 'string' ? payload.note.trim() : '';
+
+    const photoReference =
+      typeof payload.photoReference === 'string'
+        ? payload.photoReference.trim()
+        : '';
+
+    await enqueueIncidentActionUseCase.execute({
+      actorId: identity.actorId,
+      incident: knownIncident,
+      action: 'start',
+    });
+
+    if (note) {
+      await enqueueIncidentActionUseCase.execute({
+        actorId: identity.actorId,
+        incident: knownIncident,
+        action: 'comment',
+        payload: { text: note },
+      });
+    }
+
+    if (photoReference) {
+      await enqueueIncidentActionUseCase.execute({
+        actorId: identity.actorId,
+        incident: knownIncident,
+        action: 'add_evidence',
+        payload: { evidenceId: photoReference },
+      });
+    }
+
+    await refreshQueueSummary();
+  };
+
+  const synchronizeQueue = async () => {
+    if (!syncService) return;
+    try {
+      await syncService.syncPending();
+      await refreshQueueSummary();
+    } catch {
+      setQueueMessage('No se pudo sincronizar la cola local.');
+    }
+  };
 
   useEffect(() => {
     if (isTestEnvironment) return;
@@ -264,17 +374,28 @@ export default function App() {
         <>
           {!isTestEnvironment ? (
             <View style={styles.sessionBar}>
-              <Text style={styles.sessionLabel}>
-                Sesión: {sessionAuthService.getActorId()}
-              </Text>
+              <View>
+                <Text style={styles.sessionLabel}>Sesión: {sessionAuthService.getActorId()}</Text>
+                <Text style={styles.queueLabel}>
+                  {queueSummary ? `Pendientes: ${queueSummary.pending}` : 'Cargando cola…'}
+                  {queueSummary && queueSummary.conflicts > 0 ? ` · Conflictos: ${queueSummary.conflicts}` : ''}
+                </Text>
+              </View>
+              <View style={styles.sessionActions}>
+                <Pressable accessibilityRole="button" onPress={() => void synchronizeQueue()}>
+                  <Text style={styles.syncText}>Sincronizar</Text>
+                </Pressable>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => void logout()}
               >
                 <Text style={styles.logoutText}>Cerrar sesión</Text>
               </Pressable>
+              </View>
             </View>
           ) : null}
+
+          {queueMessage ? <Text accessibilityRole="alert" style={styles.queueError}>{queueMessage}</Text> : null}
 
           {selectedIncidentId === null ? (
             <IncidentListScreen
@@ -287,6 +408,16 @@ export default function App() {
               incidentId={selectedIncidentId}
               getIncidentDetailUseCase={getIncidentDetailUseCase}
               onBack={() => setSelectedIncidentId(null)}
+              {...(offlineQueue
+                ? {
+                    offlineActions: {
+                      canStartAttention: sessionAuthService.getAuthenticatedIdentity()?.role === 'technician',
+                      pendingCount: queueSummary?.pending ?? 0,
+                      conflictCount: queueSummary?.conflicts ?? 0,
+                      onStartAttention: enqueueStartAttention,
+                    },
+                  }
+                : {})}
             />
           )}
         </>
@@ -359,6 +490,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#EEF2FF',
   },
+  sessionActions: {
+    flexDirection: 'row',
+    gap: 14,
+  },
   sessionLabel: {
     color: '#312E81',
     fontSize: 12,
@@ -368,5 +503,21 @@ const styles = StyleSheet.create({
     color: '#4338CA',
     fontSize: 13,
     fontWeight: '600',
+  },
+  syncText: {
+    color: '#4338CA',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  queueLabel: {
+    color: '#4B5563',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  queueError: {
+    color: '#B91C1C',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    fontSize: 12,
   },
 });

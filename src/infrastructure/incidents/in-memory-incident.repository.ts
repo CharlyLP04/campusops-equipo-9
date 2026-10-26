@@ -4,6 +4,7 @@ import type { IncidentRepository as IncidentRepositoryPort } from '../../domain/
 const SYNTHETIC_INCIDENTS: readonly Incident[] = [
   {
     id: 'incident-001',
+    version: 1,
     reporterId: 'reporter-001',
     category: 'electrical',
     description: 'Lámpara apagada en el pasillo del edificio de aulas.',
@@ -13,6 +14,7 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'incident-002',
+    version: 1,
     reporterId: 'reporter-002',
     category: 'connectivity',
     description: 'Sin conectividad en el laboratorio de cómputo.',
@@ -22,6 +24,7 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'incident-003',
+    version: 1,
     reporterId: 'reporter-003',
     category: 'water',
     description: 'Fuga de agua junto al acceso de la biblioteca.',
@@ -31,6 +34,7 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'incident-004',
+    version: 1,
     reporterId: 'reporter-004',
     category: 'equipment',
     description: 'Proyector sin imagen en el salón de pruebas.',
@@ -40,6 +44,7 @@ const SYNTHETIC_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'incident-005',
+    version: 1,
     reporterId: 'reporter-005',
     category: 'safety',
     description: 'Puerta de emergencia trabada en edificio de gobierno.',
@@ -72,6 +77,7 @@ export class InMemoryIncidentRepository implements IncidentRepositoryPort {
   }): Promise<Incident> {
     const incident: Incident = {
       id: `incident-local-${this.incidents.length + 1}`,
+      version: 1,
       reporterId: 'reporter-local',
       category: input.category,
       description: input.description,

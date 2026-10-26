@@ -53,6 +53,8 @@ export type IncidentLocation = Readonly<{
 
 export type Incident = Readonly<{
   id: string;
+  /** Versión remota conocida; es necesaria para encolar cambios offline seguros. */
+  version?: number;
   reporterId: string;
   category: IncidentCategory;
   description: string;
