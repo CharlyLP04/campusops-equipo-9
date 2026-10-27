@@ -95,3 +95,38 @@ implementa v1 → v2 ni rollback. Pacheco deberá consumir el contrato real de l
 tabla `pending_operations` y sus columnas anteriores si la migración necesita
 conservar operaciones. Hasta que exista ese módulo verificable, no se declara
 una migración ni una recuperación de rollback implementada.
+
+
+## Migración y recuperación del esquema v1 a v2
+
+La migración de CampusOps se implementa en
+`src/infrastructure/storage/migrations/schema-migration.ts`. La versión se
+consulta mediante `PRAGMA user_version` y sólo se admite la transición explícita
+de la versión 1 a la versión 2.
+
+La versión 2 agrega a la tabla `incidents` la columna obligatoria
+`sync_state`, cuyos valores permitidos son `synced`, `pending` y `conflict`.
+Las incidencias relacionadas con registros existentes en
+`pending_operations` se inicializan como `pending`; las demás se consideran
+`synced`. La tabla de operaciones no se reconstruye, por lo que conserva el
+mismo `operation_id`, contenido serializado, versión base, intentos y estado.
+
+Toda la transición se ejecuta dentro de una sola transacción iniciada con
+`BEGIN IMMEDIATE TRANSACTION`. Los pasos son:
+
+1. Agregar `sync_state` con un valor predeterminado seguro.
+2. Marcar como pendientes las incidencias que tengan operaciones en la cola.
+3. Actualizar `PRAGMA user_version` a 2.
+4. Confirmar todos los cambios mediante `COMMIT`.
+
+El migrador permite inyectar una falla determinista con `failAfterStep`. Si
+cualquier paso falla, ejecuta `ROLLBACK`: la versión continúa en 1, no aparece
+la nueva columna y se conservan sin cambios tanto las incidencias como las
+operaciones pendientes. Posteriormente se puede repetir la migración completa.
+Si la base ya está en la versión 2, la ejecución es idempotente y no modifica ni
+duplica información.
+
+La prueba `course-tests/schema-migration.test.ts` registra los tres estados
+requeridos: antes de migrar, después de una falla controlada en el paso 2 y
+después de recuperar correctamente. También comprueba que una segunda
+ejecución sobre v2 no altera los datos.
