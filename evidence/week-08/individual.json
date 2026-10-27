@@ -37,6 +37,32 @@
         "command": "npx jest course-tests/offline-queue-restart.test.ts course-tests/sync-engine.test.ts course-tests/smoke.test.tsx --runInBand",
         "observedResult": "La prueba de reinicio SQLite y la del motor de sincronización pasaron. El smoke excedió el timeout de 5 segundos en la ejecución conjunta, pero pasó al ejecutarse por separado en 3.049 segundos. Las siete suites adicionales también pasaron, con 38 pruebas aprobadas.",
         "explanation": "Implementé con asistencia de herramientas de IA una cola persistente SQLite compatible con OfflineQueuePort, una prueba de reinicio sobre una base SQLite real en disco, un caso de uso para consultar pendientes y conflictos, integración en la interfaz y documentación del modelo de datos. Ejecuté las pruebas de persistencia, sincronización, autenticación y permisos. La versión del esquema debe coordinarse con la migración que implementará Pacheco."
+      },
+
+      {
+        "studentId": "Pacheco",
+        "name": "Carlos Alberto Pacheco Avila",
+        "commitShas": ["2203ceff5cfd7625e34e3bf6e70f0e44ae14743d"],
+        "files": [
+          "src/infrastructure/storage/migrations/schema-migration.ts",
+          "course-tests/schema-migration.test.ts",
+          "docs/data-model.md",
+          "reports/week-08/migration-tests.json"
+        ],
+        "tests": [
+          "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts — PASS: 1 suite y 2 pruebas",
+          "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts — PASS: 3 suites y 22 pruebas",
+          "npm.cmd run typecheck — PASS"
+        ],
+        "reviews": [
+          "Se revisó que la migración coincida con la tabla pending_operations implementada por Alexis y que conserve la identidad estable de las operaciones."
+        ],
+        "prediction": "Si la migración falla después del segundo paso, la transacción debe revertir tanto la nueva columna como los cambios de datos, conservando la versión 1, las incidencias y todas las operaciones pendientes.",
+        "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+        "observedResult": "PASS: 2 pruebas aprobaron. La falla controlada en el paso 2 dejó el estado completo en v1 y la recuperación posterior produjo v2 sin pérdida ni duplicación.",
+        "explanation": "Implementé la migración atómica v1 a v2 con BEGIN IMMEDIATE, COMMIT y ROLLBACK. Agregué failAfterStep para reproducir AC-03 y una prueba SQLite que registra el estado antes, después de la falla y después de recuperar. También comprobé que una segunda ejecución sobre v2 es idempotente."
       }
+
+      
     ]
   }

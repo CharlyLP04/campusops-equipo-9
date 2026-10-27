@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "2203ceff5cfd7625e34e3bf6e70f0e44ae14743d",
+  "generatedAt": "2026-10-27T03:53:07Z",
+  "checks": [
+    {
+      "id": "offline_queue_restart",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npx jest course-tests/offline-queue-restart.test.ts --runInBand",
+      "evidence": "Resultado real registrado por Alexis: la cola SQLite recuperó después del reinicio el mismo operationId y el mismo contenido, conservando nota y referencia local de fotografía."
+    },
+    {
+      "id": "migration_v1_to_v2",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+      "evidence": "La migración cambió PRAGMA user_version de 1 a 2, agregó sync_state y conservó una incidencia y su operación pendiente con operationId operation-stable-001."
+    },
+    {
+      "id": "controlled_migration_failure",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+      "evidence": "La inyección failAfterStep: 2 produjo el error controlado esperado y activó ROLLBACK."
+    },
+    {
+      "id": "atomic_rollback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+      "evidence": "Después de la falla el esquema permaneció completamente en v1: sync_state no existía, la incidencia seguía intacta y la operación pendiente conservaba exactamente el mismo contenido."
+    },
+    {
+      "id": "migration_recovery",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+      "evidence": "Después del rollback se repitió la migración y se obtuvo v2 completo. Una segunda ejecución fue idempotente y no duplicó ni modificó datos."
+    },
+    {
+      "id": "remote_reassignment_conflict",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts",
+      "evidence": "El inicio local de atención frente a una reasignación remota se declaró como conflicto sin sobrescribir la asignación del servidor ni eliminar la intención pendiente."
+    },
+    {
+      "id": "independent_changes_merge",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts",
+      "evidence": "Los cambios realizados sobre campos independientes se combinaron sin mutar las entradas originales."
+    },
+    {
+      "id": "operation_deduplication",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts",
+      "evidence": "Las operaciones repetidas con el mismo operationId conservaron la primera intención y produjeron un solo efecto."
+    },
+    {
+      "id": "consolidated_week_08_tests",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts",
+      "evidence": "PASS: 3 suites, 22 pruebas, 0 fallos y 0 snapshots en 4.641 segundos."
+    },
+    {
+      "id": "typescript_typecheck",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm.cmd run typecheck",
+      "evidence": "TypeScript finalizó correctamente con tsc --noEmit y sin errores."
+    }
+  ]
+}
