@@ -88,15 +88,6 @@ Las notas y referencias de fotografías pendientes permanecen en `payload_json`.
 Una referencia de fotografía es sólo un identificador local de recurso pendiente:
 no representa una carga ni una confirmación del servidor.
 
-## Coordinación con la migración de Pacheco
-
-Este cambio no crea ni modifica `src/infrastructure/storage/migrations/`, no
-implementa v1 → v2 ni rollback. Pacheco deberá consumir el contrato real de la
-tabla `pending_operations` y sus columnas anteriores si la migración necesita
-conservar operaciones. Hasta que exista ese módulo verificable, no se declara
-una migración ni una recuperación de rollback implementada.
-
-
 ## Migración y recuperación del esquema v1 a v2
 
 La migración de CampusOps se implementa en
