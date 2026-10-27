@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 8,
-  "commitSha": "0db60fa27c5b7e6e67e0ea5501309a7c5b92f726",
+  "commitSha": "842243267f8468c5e57fa1d8edb1b1ab9576bcbd",
   "decision": "Implementar una cola offline persistente en SQLite (SqliteOfflineQueue) con identidad estable por operación (operationId reutilizado como Idempotency-Key), migración de esquema v1 a v2 envuelta en una transacción exclusiva (BEGIN IMMEDIATE ... COMMIT/ROLLBACK) y un motor de sincronización de tres vías (resolveSync) que compara campos por JSON canónico: combina automáticamente cambios en campos independientes, declara conflicto explícito sobre el campo compuesto work cuando colisionan un inicio de atención local sin conexión y una reasignación remota, y retira de la cola únicamente las operaciones confirmadas por el servidor o descartadas explícitamente por el autor.",
   "alternatives": [
     "Alternativa A (Last-Write-Wins con cola en memoria): Mantener las operaciones pendientes en un arreglo en memoria y sobrescribir el estado remoto con el último envío del cliente al reconectar. Se descartó porque pierde toda la cola al cerrar o reiniciar la aplicación e impone una asignación antigua de técnico sobre la reasignación realizada por coordinación.",
