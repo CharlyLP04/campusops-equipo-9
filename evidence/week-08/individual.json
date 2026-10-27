@@ -1,68 +1,102 @@
 {
-    "schemaVersion": 1,
-    "week": 8,
-    "teamId": "equipo-9",
-    "members": [
-      {
-        "studentId": "Alexis",
-        "name": "Alexis Montalvo Osorio",
-        "commitShas": [
-          "59bd53bef502fa178fffbd1cc4c00c01bc4a3b39"
-        ],
-        "files": [
-          "src/infrastructure/sync/sqlite-offline-queue.ts",
-          "course-tests/offline-queue-restart.test.ts",
-          "src/application/sync/get-offline-queue-summary.usecase.ts",
-          "src/domain/incidents/incident.entity.ts",
-          "src/infrastructure/incidents/cloud-incident.repository.ts",
-          "src/infrastructure/incidents/in-memory-incident.repository.ts",
-          "src/ui/screens/IncidentDetailScreen.tsx",
-          "App.tsx",
-          "docs/data-model.md",
-          "app.json",
-          "package.json",
-          "package-lock.json"
-        ],
-        "tests": [
-          "npm run typecheck — PASS",
-          "npm run lint — PASS",
-          "npx jest course-tests/offline-queue-restart.test.ts course-tests/sync-engine.test.ts course-tests/smoke.test.tsx --runInBand — reinicio y motor pasaron; smoke excedió el timeout",
-          "npx jest course-tests/smoke.test.tsx --runInBand — PASS",
-          "npx jest course-tests/sync-backend-integration.test.ts course-tests/auth-concurrency.test.ts course-tests/auth-rbac.test.ts course-tests/session-auth.test.ts course-tests/session-restoration.test.ts course-tests/incident-rbac-usecases.test.ts course-tests/expo-secure-storage.adapter.test.ts --runInBand — 7 suites, 38 pruebas aprobadas"
-        ],
-        "reviews": [
-          "Revisión técnica asistida por Codex y ChatGPT. Se inspeccionaron la cola SQLite, la prueba de reinicio, la integración de la interfaz y la documentación. Queda pendiente coordinar con Pacheco el registro de versión del esquema SQLite."
-        ],
-        "prediction": "La cola debe conservar el mismo operationId y el contenido completo después de cerrar y reabrir una conexión sobre el mismo archivo SQLite. Repetir el identificador no debe reemplazar la primera operación.",
-        "command": "npx jest course-tests/offline-queue-restart.test.ts course-tests/sync-engine.test.ts course-tests/smoke.test.tsx --runInBand",
-        "observedResult": "La prueba de reinicio SQLite y la del motor de sincronización pasaron. El smoke excedió el timeout de 5 segundos en la ejecución conjunta, pero pasó al ejecutarse por separado en 3.049 segundos. Las siete suites adicionales también pasaron, con 38 pruebas aprobadas.",
-        "explanation": "Implementé con asistencia de herramientas de IA una cola persistente SQLite compatible con OfflineQueuePort, una prueba de reinicio sobre una base SQLite real en disco, un caso de uso para consultar pendientes y conflictos, integración en la interfaz y documentación del modelo de datos. Ejecuté las pruebas de persistencia, sincronización, autenticación y permisos. La versión del esquema debe coordinarse con la migración que implementará Pacheco."
-      },
-
-      {
-        "studentId": "Pacheco",
-        "name": "Carlos Alberto Pacheco Avila",
-        "commitShas": ["2203ceff5cfd7625e34e3bf6e70f0e44ae14743d"],
-        "files": [
-          "src/infrastructure/storage/migrations/schema-migration.ts",
-          "course-tests/schema-migration.test.ts",
-          "docs/data-model.md",
-          "reports/week-08/migration-tests.json"
-        ],
-        "tests": [
-          "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts — PASS: 1 suite y 2 pruebas",
-          "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts — PASS: 3 suites y 22 pruebas",
-          "npm.cmd run typecheck — PASS"
-        ],
-        "reviews": [
-          "Se revisó que la migración coincida con la tabla pending_operations implementada por Alexis y que conserve la identidad estable de las operaciones."
-        ],
-        "prediction": "Si la migración falla después del segundo paso, la transacción debe revertir tanto la nueva columna como los cambios de datos, conservando la versión 1, las incidencias y todas las operaciones pendientes.",
-        "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
-        "observedResult": "PASS: 2 pruebas aprobaron. La falla controlada en el paso 2 dejó el estado completo en v1 y la recuperación posterior produjo v2 sin pérdida ni duplicación.",
-        "explanation": "Implementé la migración atómica v1 a v2 con BEGIN IMMEDIATE, COMMIT y ROLLBACK. Agregué failAfterStep para reproducir AC-03 y una prueba SQLite que registra el estado antes, después de la falla y después de recuperar. También comprobé que una segunda ejecución sobre v2 es idempotente."
-      }
-
-      
-    ]
-  }
+  "schemaVersion": 1,
+  "week": 8,
+  "teamId": "equipo-9",
+  "members": [
+    {
+      "studentId": "Carlos",
+      "name": "Carlos Olaya Gutiérrez",
+      "commitShas": [
+        "76bf8638e22c96b6582dd3bee7fc22643d1ef143"
+      ],
+      "files": [
+        "src/domain/sync/sync.types.ts",
+        "src/domain/sync/pending-operation.ts",
+        "src/domain/sync/offline-queue.port.ts",
+        "src/domain/sync/resolve-sync.ts",
+        "src/domain/sync/deduplicate-operations.ts",
+        "src/application/sync/enqueue-incident-action.usecase.ts",
+        "src/application/sync/sync-remote.port.ts",
+        "src/application/sync/sync.service.ts",
+        "src/infrastructure/sync/http-sync-remote.ts",
+        "src/course-evaluation/index.ts",
+        "docs/sync-policy.md",
+        "course-tests/sync-engine.test.ts",
+        "course-tests/sync-backend-integration.test.ts",
+        "evidence/week-08/engineering.json"
+      ],
+      "tests": [
+        "npx jest --ci --runInBand course-tests/public/week-08.test.ts — PASS (1 suite, 3 pruebas)",
+        "npx jest --ci --runInBand course-tests/sync-engine.test.ts — PASS (1 suite, 17 pruebas)",
+        "npx jest --ci --runInBand course-tests/sync-backend-integration.test.ts — PASS (1 suite, 4 pruebas)"
+      ],
+      "reviews": [
+        "Revisión e integración de PR #37, PR #38 (cola SQLite de Alexis) y PR #39 (migración v1->v2 con rollback de Pacheco), verificando contratos de OfflineQueuePort y cumplimiento de AC-01 a AC-05."
+      ],
+      "prediction": "Al comparar campos por JSON canónico y enviar cada operación con su operationId estable como Idempotency-Key, los cambios en campos independientes se combinarán sin mutar entradas, el cruce entre inicio local y reasignación remota reportará conflicto en work sin sobrescribir la asignación del servidor ni borrar la cola, y un reintento tras timeout_after_commit no duplicará el efecto.",
+      "command": "npx jest --ci --runInBand course-tests/sync-engine.test.ts course-tests/sync-backend-integration.test.ts course-tests/public/week-08.test.ts",
+      "observedResult": "PASS: 3 suites y 24 pruebas aprobadas en 2.289 s. Se verificaron combinación 3-way, conflicto en ['work'], deduplicación por operationId, validación RBAC al encolar, retención ante HTTP 500/timeout y replay idempotente contra course-backend.",
+      "explanation": "Implementé el motor de sincronización 3-way (resolveSync), la deduplicación por identidad estable (deduplicateOperations), el caso de uso EnqueueIncidentActionUseCase con validación RBAC de semana 6, el coordinador SyncService, el adaptador HttpSyncRemote con Idempotency-Key y la política documentada en docs/sync-policy.md."
+    },
+    {
+      "studentId": "Alexis",
+      "name": "Alexis Montalvo Osorio",
+      "commitShas": [
+        "59bd53bef502fa178fffbd1cc4c00c01bc4a3b39"
+      ],
+      "files": [
+        "src/infrastructure/sync/sqlite-offline-queue.ts",
+        "course-tests/offline-queue-restart.test.ts",
+        "src/application/sync/get-offline-queue-summary.usecase.ts",
+        "src/domain/incidents/incident.entity.ts",
+        "src/infrastructure/incidents/cloud-incident.repository.ts",
+        "src/infrastructure/incidents/in-memory-incident.repository.ts",
+        "src/ui/screens/IncidentDetailScreen.tsx",
+        "App.tsx",
+        "docs/data-model.md",
+        "app.json",
+        "package.json",
+        "package-lock.json"
+      ],
+      "tests": [
+        "npm run typecheck — PASS",
+        "npm run lint — PASS",
+        "npx jest course-tests/offline-queue-restart.test.ts --runInBand — PASS",
+        "npx jest course-tests/smoke.test.tsx --runInBand — PASS",
+        "npx jest course-tests/sync-backend-integration.test.ts course-tests/auth-concurrency.test.ts course-tests/auth-rbac.test.ts course-tests/session-auth.test.ts course-tests/session-restoration.test.ts course-tests/incident-rbac-usecases.test.ts course-tests/expo-secure-storage.adapter.test.ts --runInBand — 7 suites, 38 pruebas aprobadas"
+      ],
+      "reviews": [
+        "Revisión técnica de la cola SQLite, la prueba de reinicio sobre archivo real, la integración en la interfaz de detalle de incidencias y la estructura de la tabla pending_operations compartida con la migración v1->v2."
+      ],
+      "prediction": "La cola debe conservar el mismo operationId y el contenido completo después de cerrar y reabrir una conexión sobre el mismo archivo SQLite. Repetir el identificador no debe reemplazar la primera operación.",
+      "command": "npx jest course-tests/offline-queue-restart.test.ts --runInBand",
+      "observedResult": "PASS: La prueba de reinicio SQLite sobre archivo en disco aprobó, recuperando el mismo operationId, nota, referencia local de fotografía y estado de conflicto tras cerrar y reabrir la base.",
+      "explanation": "Implementé una cola persistente SQLite compatible con OfflineQueuePort (SqliteOfflineQueue), una prueba de reinicio sobre una base SQLite real en disco, un caso de uso para consultar pendientes y conflictos, integración en la interfaz de usuario y documentación del modelo de datos en docs/data-model.md."
+    },
+    {
+      "studentId": "Pacheco",
+      "name": "Carlos Alberto Pacheco Avila",
+      "commitShas": [
+        "2203ceff5cfd7625e34e3bf6e70f0e44ae14743d"
+      ],
+      "files": [
+        "src/infrastructure/storage/migrations/schema-migration.ts",
+        "course-tests/schema-migration.test.ts",
+        "docs/data-model.md",
+        "reports/week-08/migration-tests.json"
+      ],
+      "tests": [
+        "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts — PASS: 1 suite y 2 pruebas",
+        "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts course-tests/sync-engine.test.ts course-tests/public/week-08.test.ts — PASS: 3 suites y 22 pruebas",
+        "npm.cmd run typecheck — PASS"
+      ],
+      "reviews": [
+        "Se revisó que la migración coincida con la tabla pending_operations implementada por Alexis y que conserve la identidad estable de las operaciones."
+      ],
+      "prediction": "Si la migración falla después del segundo paso, la transacción debe revertir tanto la nueva columna como los cambios de datos, conservando la versión 1, las incidencias y todas las operaciones pendientes.",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/schema-migration.test.ts",
+      "observedResult": "PASS: 2 pruebas aprobaron. La falla controlada en el paso 2 dejó el estado completo en v1 y la recuperación posterior produjo v2 sin pérdida ni duplicación.",
+      "explanation": "Implementé la migración atómica v1 a v2 con BEGIN IMMEDIATE, COMMIT y ROLLBACK. Agregué failAfterStep para reproducir AC-03 y una prueba SQLite que registra el estado antes, después de la falla y después de recuperar. También comprobé que una segunda ejecución sobre v2 es idempotente."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "commitSha": "0db60fa27c5b7e6e67e0ea5501309a7c5b92f726",
+  "decision": "Implementar una cola offline persistente en SQLite (SqliteOfflineQueue) con identidad estable por operación (operationId reutilizado como Idempotency-Key), migración de esquema v1 a v2 envuelta en una transacción exclusiva (BEGIN IMMEDIATE ... COMMIT/ROLLBACK) y un motor de sincronización de tres vías (resolveSync) que compara campos por JSON canónico: combina automáticamente cambios en campos independientes, declara conflicto explícito sobre el campo compuesto work cuando colisionan un inicio de atención local sin conexión y una reasignación remota, y retira de la cola únicamente las operaciones confirmadas por el servidor o descartadas explícitamente por el autor.",
+  "alternatives": [
+    "Alternativa A (Last-Write-Wins con cola en memoria): Mantener las operaciones pendientes en un arreglo en memoria y sobrescribir el estado remoto con el último envío del cliente al reconectar. Se descartó porque pierde toda la cola al cerrar o reiniciar la aplicación e impone una asignación antigua de técnico sobre la reasignación realizada por coordinación.",
+    "Alternativa B (Descarte automático ante HTTP 403/409 o migración paso a paso sin transacción): Eliminar de la cola cualquier operación rechazada por conflicto de versión o cambio de asignación y ejecutar los ALTER/UPDATE de migración en sentencias sueltas. Se descartó porque provoca pérdida silenciosa del trabajo registrado en campo y deja el esquema parcialmente migrado si ocurre un fallo intermedio.",
+    "Alternativa C (Cola SQLite transaccional + 3-way merge por JSON canónico + retención de conflictos): Persistir cada operación con operationId, baseVersion, baseFields y localFields en SQLite, ejecutar migraciones v1->v2 dentro de BEGIN IMMEDIATE con ROLLBACK ante fallas, deduplicar por operationId y conservar en estado conflict cualquier colisión sobre work hasta resolución explícita."
+  ],
+  "tradeoff": "Beneficio: Garantiza cero pérdida silenciosa de cambios al reiniciar la app o al fallar la red, atomicidad completa en la migración de esquema v1 a v2 (rollback íntegro ante falla intermedia), idempotencia extremo a extremo ante respuestas perdidas (timeout_after_commit) y preservación tanto de la reasignación remota de coordinación como de la intención local del técnico. Costo: Mayor almacenamiento por operación (al guardar baseFields, localFields y metadatos de conflicto en SQLite) y necesidad de un flujo explícito de resolución (resolveConflict) cuando una incidencia cambia de técnico mientras estaba en atención offline.",
+  "requirementIds": [
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05"
+  ],
+  "verification": [
+    {
+      "command": "npx jest --ci --runInBand course-tests/public/week-08.test.ts course-tests/sync-engine.test.ts course-tests/sync-backend-integration.test.ts",
+      "result": "PASS: 3 suites y 24 pruebas aprobadas (combinación 3-way, conflicto en work, deduplicación, RBAC e integración con course-backend).",
+      "evidence": "resolveSync detectó { kind: 'conflict', fields: ['work'] } sin mutar base/local/remote cuando technician-1 inició atención offline y coordinator-1 reasignó a technician-2; deduplicateOperations preservó la primera operación por operationId; y tras timeout_after_commit el reenvío con el mismo Idempotency-Key devolvió duplicate: true sin duplicar efectos."
+    },
+    {
+      "command": "npx jest --ci --runInBand course-tests/offline-queue-restart.test.ts",
+      "result": "PASS: 1 suite aprobada sobre archivo SQLite real en disco.",
+      "evidence": "SqliteOfflineQueue persistió la operación offline-op-0001 con nota y referencia photo-ref-local-001, cerró la conexión SQLite y al abrir una nueva instancia sobre el mismo archivo recuperó idéntico operationId, contenido y estado de conflicto."
+    },
+    {
+      "command": "npx jest --ci --runInBand course-tests/schema-migration.test.ts",
+      "result": "PASS: 1 suite y 2 pruebas aprobadas (migración v1->v2, falla controlada en paso 2 con rollback y recuperación idempotente).",
+      "evidence": "Con failAfterStep: 2 la transacción ejecutó ROLLBACK manteniendo PRAGMA user_version=1, sin columna sync_state y con la incidencia y operación operation-stable-001 intactas; la ejecución posterior completó la migración a v2 con sync_state='pending'."
+    }
+  ]
+}
