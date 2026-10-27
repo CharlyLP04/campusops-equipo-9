@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -48,6 +49,12 @@ interface IncidentDetailScreenProps {
   incidentId: string;
   getIncidentDetailUseCase: GetIncidentDetailUseCase;
   onBack: () => void;
+  offlineActions?: Readonly<{
+    canStartAttention: boolean;
+    pendingCount: number;
+    conflictCount: number;
+    onStartAttention: (incident: Incident, payload: Readonly<Record<string, unknown>>) => Promise<void>;
+  }>;
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -64,10 +71,15 @@ export function IncidentDetailScreen({
   incidentId,
   getIncidentDetailUseCase,
   onBack,
+  offlineActions,
 }: IncidentDetailScreenProps) {
   const [incident, setIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [pendingNote, setPendingNote] = useState('');
+  const [pendingPhotoReference, setPendingPhotoReference] = useState('');
+  const [queueMessage, setQueueMessage] = useState<string | null>(null);
+  const [enqueueing, setEnqueueing] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -103,6 +115,25 @@ export function IncidentDetailScreen({
     incident != null
       ? INCIDENT_CATEGORY_LABELS[incident.category] ?? incident.category
       : '';
+
+  const enqueueStartAttention = async () => {
+    if (!incident || !offlineActions || enqueueing) return;
+    setEnqueueing(true);
+    setQueueMessage(null);
+    try {
+      const payload: Record<string, unknown> = {};
+      if (pendingNote.trim()) payload.note = pendingNote.trim();
+      if (pendingPhotoReference.trim()) {
+        payload.photoReference = pendingPhotoReference.trim();
+      }
+      await offlineActions.onStartAttention(incident, payload);
+      setQueueMessage('Atención guardada localmente como operación pendiente.');
+    } catch {
+      setQueueMessage('No fue posible guardar la operación local.');
+    } finally {
+      setEnqueueing(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -170,6 +201,54 @@ export function IncidentDetailScreen({
             <Text style={styles.sectionTitle}>Descripción del problema</Text>
             <Text style={styles.description}>{incident.description}</Text>
           </View>
+
+          {offlineActions ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Atención sin conexión</Text>
+              <View style={styles.offlineCard}>
+                <Text style={styles.queueStatus}>
+                  Operaciones pendientes: {offlineActions.pendingCount}
+                </Text>
+                {offlineActions.conflictCount > 0 ? (
+                  <Text style={styles.conflictStatus}>
+                    Conflictos pendientes: {offlineActions.conflictCount}
+                  </Text>
+                ) : null}
+                <TextInput
+                  value={pendingNote}
+                  onChangeText={setPendingNote}
+                  placeholder="Nota pendiente (opcional)"
+                  style={styles.textInput}
+                />
+                <TextInput
+                  value={pendingPhotoReference}
+                  onChangeText={setPendingPhotoReference}
+                  placeholder="Referencia de foto pendiente (opcional)"
+                  style={styles.textInput}
+                />
+                <TouchableOpacity
+                  testID="start-attention-button"
+                  accessibilityRole="button"
+                  disabled={!offlineActions.canStartAttention || enqueueing || incident.version === undefined}
+                  style={[
+                    styles.startAttentionButton,
+                    (!offlineActions.canStartAttention || incident.version === undefined) && styles.disabledButton,
+                  ]}
+                  onPress={() => void enqueueStartAttention()}
+                >
+                  <Text style={styles.startAttentionText}>
+                    {enqueueing ? 'Guardando…' : 'Iniciar atención'}
+                  </Text>
+                </TouchableOpacity>
+                {incident.version === undefined ? (
+                  <Text style={styles.queueHint}>
+                    Esta incidencia no tiene una versión local válida para encolar cambios.
+                  </Text>
+                ) : null}
+                {queueMessage ? <Text style={styles.queueHint}>{queueMessage}</Text> : null}
+              </View>
+            </View>
+          ) : null}
 
           {/* Información */}
           <View style={styles.section}>
@@ -303,6 +382,52 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     overflow: 'hidden',
+  },
+  offlineCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 14,
+    gap: 10,
+  },
+  queueStatus: {
+    color: '#374151',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  conflictStatus: {
+    color: '#B45309',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#111827',
+    fontSize: 14,
+  },
+  startAttentionButton: {
+    backgroundColor: '#4F46E5',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#9CA3AF',
+  },
+  startAttentionText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  queueHint: {
+    color: '#6B7280',
+    fontSize: 12,
+    lineHeight: 18,
   },
   infoRow: {
     flexDirection: 'row',

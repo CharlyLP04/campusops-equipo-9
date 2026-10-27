@@ -1,0 +1,42 @@
+{
+    "schemaVersion": 1,
+    "week": 8,
+    "teamId": "equipo-9",
+    "members": [
+      {
+        "studentId": "Alexis",
+        "name": "Alexis Montalvo Osorio",
+        "commitShas": [
+          "59bd53bef502fa178fffbd1cc4c00c01bc4a3b39"
+        ],
+        "files": [
+          "src/infrastructure/sync/sqlite-offline-queue.ts",
+          "course-tests/offline-queue-restart.test.ts",
+          "src/application/sync/get-offline-queue-summary.usecase.ts",
+          "src/domain/incidents/incident.entity.ts",
+          "src/infrastructure/incidents/cloud-incident.repository.ts",
+          "src/infrastructure/incidents/in-memory-incident.repository.ts",
+          "src/ui/screens/IncidentDetailScreen.tsx",
+          "App.tsx",
+          "docs/data-model.md",
+          "app.json",
+          "package.json",
+          "package-lock.json"
+        ],
+        "tests": [
+          "npm run typecheck — PASS",
+          "npm run lint — PASS",
+          "npx jest course-tests/offline-queue-restart.test.ts course-tests/sync-engine.test.ts course-tests/smoke.test.tsx --runInBand — reinicio y motor pasaron; smoke excedió el timeout",
+          "npx jest course-tests/smoke.test.tsx --runInBand — PASS",
+          "npx jest course-tests/sync-backend-integration.test.ts course-tests/auth-concurrency.test.ts course-tests/auth-rbac.test.ts course-tests/session-auth.test.ts course-tests/session-restoration.test.ts course-tests/incident-rbac-usecases.test.ts course-tests/expo-secure-storage.adapter.test.ts --runInBand — 7 suites, 38 pruebas aprobadas"
+        ],
+        "reviews": [
+          "Revisión técnica asistida por Codex y ChatGPT. Se inspeccionaron la cola SQLite, la prueba de reinicio, la integración de la interfaz y la documentación. Queda pendiente coordinar con Pacheco el registro de versión del esquema SQLite."
+        ],
+        "prediction": "La cola debe conservar el mismo operationId y el contenido completo después de cerrar y reabrir una conexión sobre el mismo archivo SQLite. Repetir el identificador no debe reemplazar la primera operación.",
+        "command": "npx jest course-tests/offline-queue-restart.test.ts course-tests/sync-engine.test.ts course-tests/smoke.test.tsx --runInBand",
+        "observedResult": "La prueba de reinicio SQLite y la del motor de sincronización pasaron. El smoke excedió el timeout de 5 segundos en la ejecución conjunta, pero pasó al ejecutarse por separado en 3.049 segundos. Las siete suites adicionales también pasaron, con 38 pruebas aprobadas.",
+        "explanation": "Implementé con asistencia de herramientas de IA una cola persistente SQLite compatible con OfflineQueuePort, una prueba de reinicio sobre una base SQLite real en disco, un caso de uso para consultar pendientes y conflictos, integración en la interfaz y documentación del modelo de datos. Ejecuté las pruebas de persistencia, sincronización, autenticación y permisos. La versión del esquema debe coordinarse con la migración que implementará Pacheco."
+      }
+    ]
+  }

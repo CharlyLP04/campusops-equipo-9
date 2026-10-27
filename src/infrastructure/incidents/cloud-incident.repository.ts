@@ -110,7 +110,7 @@ import {
       );
     }
 
-    const { id, status, payload } = parsed.value;
+    const { id, version, status, payload } = parsed.value;
 
     if (payload === null) {
       return null;
@@ -141,6 +141,7 @@ import {
 
     return {
       id,
+      version,
       reporterId,
       category,
       description,
