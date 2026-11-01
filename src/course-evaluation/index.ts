@@ -10,6 +10,7 @@ import type { IncidentLocation } from '../campusops/contracts';
 import { SessionCoordinator } from '../domain/auth/session-coordinator';
 import { resolveSync as resolveSyncDomain } from '../domain/sync/resolve-sync';
 import { deduplicateOperations as deduplicateOperationsDomain } from '../domain/sync/deduplicate-operations';
+import { planRetry as planRetryDomain } from '../domain/resilience/plan-retry';
 
 function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
@@ -143,14 +144,15 @@ export function deduplicateOperations<T extends Readonly<{ operationId: string }
   return deduplicateOperationsDomain(operations);
 }
 
-export function planRetry(_input: Readonly<{
+/** Week 09: delega en el planificador real de reintentos (src/domain/resilience/plan-retry). */
+export function planRetry(input: Readonly<{
   method: 'GET' | 'POST';
   status: number | 'timeout';
   attempt: number;
   retryAfterMs?: number;
   idempotencyKey?: string;
 }>): Readonly<{ retry: boolean; delayMs: number; requiresStableIdempotencyKey: boolean }> {
-  return pending('planRetry');
+  return planRetryDomain(input);
 }
 
 export function reduceRemoteResponses(_input: Readonly<{
