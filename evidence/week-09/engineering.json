@@ -1,0 +1,48 @@
+{
+    "schemaVersion": 1,
+    "week": 9,
+    "commitSha": "088cabd1f78779e279edc4b3915ae8bc6e14fc36",
+    "decision": "Implementar un adaptador HTTP de geocodificación separado de la interfaz, con caché en memoria de cinco minutos, validación estricta de coordenadas, reintentos acotados para fallos transitorios y alternativa de captura manual cuando el proveedor no puede resolver la ubicación.",
+    "alternatives": [
+      {
+        "name": "Consultar directamente al proveedor desde la pantalla",
+        "benefit": "Reduce las capas de implementación y permite realizar una consulta con menos código inicial.",
+        "cost": "Acopla la interfaz a la comunicación HTTP, dificulta las pruebas aisladas y puede repetir solicitudes innecesarias."
+      },
+      {
+        "name": "Utilizar una caché persistente en el dispositivo",
+        "benefit": "Permite conservar ubicaciones consultadas incluso después de cerrar y volver a abrir la aplicación.",
+        "cost": "Añade complejidad de persistencia, expiración e invalidación, además de requerir mayor cuidado con la conservación de datos de ubicación."
+      },
+      {
+        "name": "Permitir únicamente la captura manual",
+        "benefit": "Evita depender de la disponibilidad del proveedor externo y simplifica el flujo de captura.",
+        "cost": "El usuario debe escribir siempre la ubicación y se pierde la resolución automática de etiquetas y coordenadas."
+      }
+    ],
+    "tradeoff": {
+      "benefit": "La solución desacopla la interfaz del proveedor, reutiliza resultados válidos mediante una caché temporal, limita solicitudes repetidas y mantiene disponible el registro de incidencias mediante una ubicación manual sin coordenadas inventadas.",
+      "cost": "La caché se conserva únicamente en memoria y se pierde al reiniciar la aplicación. Además, cuando se agotan los reintentos o los datos no son válidos, el usuario debe proporcionar o confirmar una referencia manual."
+    },
+    "requirementIds": [
+      "AC-01",
+      "AC-02",
+      "AC-03",
+      "AC-04",
+      "AC-05"
+    ],
+    "verification": {
+      "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts course-tests/incident-list-screen.test.tsx course-tests/smoke.test.tsx",
+      "result": "PASS: 5 suites y 36 pruebas aprobadas en 4.925 segundos.",
+      "evidence": [
+        {
+          "command": "npm run typecheck",
+          "result": "PASS: comprobación de tipos completada sin errores."
+        },
+        {
+          "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts course-tests/incident-list-screen.test.tsx course-tests/smoke.test.tsx",
+          "result": "PASS: 5 suites y 36 pruebas aprobadas."
+        }
+      ]
+    }
+  }
