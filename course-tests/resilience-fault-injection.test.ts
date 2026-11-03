@@ -185,10 +185,10 @@ async function readIncident(): Promise<{
   version: number;
   status: string;
   payload: {
-    history: Array<{
+    history: {
       operationId: string;
       action: string;
-    }>;
+    }[];
   };
 }> {
   const response = await nodeFetch(
@@ -205,10 +205,10 @@ async function readIncident(): Promise<{
     version: number;
     status: string;
     payload: {
-      history: Array<{
+      history: {
         operationId: string;
         action: string;
-      }>;
+      }[];
     };
   }>;
 }

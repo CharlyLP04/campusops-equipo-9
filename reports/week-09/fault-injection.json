@@ -1,81 +1,71 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "31a1d18836c846b6b27c6895792a4f448469d58b",
-  "generatedAt": "2026-11-03T04:43:17Z",
-  "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
-  "status": "pass",
-  "summary": {
-    "testSuitesPassed": 1,
-    "testsPassed": 10,
-    "testsFailed": 0,
-    "usesLocalBackend": true,
-    "publicInternetRequired": false,
-    "sensitiveTelemetryDetected": false
-  },
-  "scenarios": [
+  "commitSha": "1ac9acab32fa1a151d9f5ef485a8a44ef5f31ca6",
+  "generatedAt": "2026-11-03T05:02:00Z",
+  "checks": [
     {
-      "id": "geocoding_cache",
-      "type": "nominal",
-      "expected": "La primera consulta usa el backend y la segunda reutiliza la caché.",
-      "observed": "La ubicación se resolvió correctamente y la segunda consulta no produjo otra llamada de red.",
-      "status": "pass"
+      "id": "geocoding_provider_cache_nominal",
+      "status": "pass",
+      "scenarioType": "nominal",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "La primera consulta a GET /v1/geocoding?q=Edificio+A resolvió { source: 'provider', label: 'Edificio de prueba A', latitude: 0, longitude: 0 } y la segunda consulta normalizada ('  edificio   a  ') reutilizó la caché (cacheHit: true, networkCalls: 1)."
     },
     {
-      "id": "incomplete_payload",
-      "type": "failure",
-      "expected": "Un resultado incompleto debe rechazarse y conservar la ubicación manual.",
-      "observed": "La aplicación degradó limpiamente a ubicación manual.",
-      "status": "pass"
+      "id": "geocoding_incomplete_payload_fallback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "Bajo X-Course-Scenario: incomplete, selectIncidentLocation y ResolveIncidentLocationUseCase rechazaron el objeto sin coordenadas y devolvieron { source: 'manual', label: 'Entrada principal del campus' } sin inventar coordenadas."
     },
     {
-      "id": "invalid_coordinates",
-      "type": "boundary",
-      "expected": "Las coordenadas fuera de rango deben rechazarse.",
-      "observed": "Las coordenadas inválidas no ingresaron al dominio y se utilizó la alternativa manual.",
-      "status": "pass"
+      "id": "geocoding_invalid_coordinates_boundary",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-09.test.ts course-tests/location-resilience.test.ts",
+      "evidence": "Coordenadas fuera de [-90, 90] y [-180, 180] (latitude: 91, latitude: 999, longitude: null) fueron rechazadas y degradaron a { source: 'manual', label: 'Edificio manual' } sin contaminar la caché."
     },
     {
-      "id": "rate_limited",
-      "type": "failure",
-      "expected": "HTTP 429 debe respetar Retry-After y detenerse después del intento permitido.",
-      "observed": "Se realizaron cuatro intentos como máximo y después se utilizó la ubicación manual.",
-      "status": "pass"
+      "id": "geocoding_rate_limited_429_fallback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "Ante HTTP 429 con Retry-After: 1, el cliente respetó las esperas de 1000 ms durante los intentos 1, 2 y 3, cortó en el intento 4 (networkCalls: 4) y conservó la ubicación manual."
     },
     {
-      "id": "server_error",
-      "type": "failure",
-      "expected": "HTTP 500 debe usar backoff acotado y no generar un ciclo infinito.",
-      "observed": "Los reintentos se detuvieron en el intento cuatro y el flujo continuó con ubicación manual.",
-      "status": "pass"
+      "id": "geocoding_server_error_500_fallback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "Ante HTTP 500 persistente (X-Course-Scenario: server_error), el cliente aplicó backoff progresivo [200, 400, 800] ms, se detuvo en el intento 4 y degradó a ubicación manual."
     },
     {
-      "id": "malformed_response",
-      "type": "failure",
-      "expected": "Una respuesta malformada debe rechazarse sin romper la interfaz.",
-      "observed": "El contrato inválido fue rechazado y se conservó la alternativa manual.",
-      "status": "pass"
+      "id": "geocoding_malformed_and_timeout_fallback",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "Ante JSON malformado (X-Course-Scenario: malformed) y respuesta lenta abortada por AbortController (X-Course-Scenario: slow con timeoutMs: 50), el adaptador capturó la falla y devolvió { source: 'manual', label: 'Entrada principal del campus' }."
     },
     {
-      "id": "slow_response",
-      "type": "failure",
-      "expected": "Una respuesta lenta debe terminar mediante timeout controlado.",
-      "observed": "El timeout fue controlado y la ubicación manual permaneció disponible.",
-      "status": "pass"
+      "id": "lost_response_timeout_after_commit_idempotency",
+      "status": "pass",
+      "scenarioType": "failure",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "Al resolver campus-inc-001 con Idempotency-Key: resolve-campus-inc-001-op-1 bajo timeout_after_commit, el intento 1 cortó por timeout tras el commit remoto y el intento 2 recibió HTTP 200 con duplicate: true y version: 3, dejando una sola entrada resolve en payload.history."
     },
     {
-      "id": "timeout_after_commit",
-      "type": "failure",
-      "expected": "El reintento debe conservar la misma clave de idempotencia y no duplicar el historial.",
-      "observed": "El segundo intento reutilizó la clave, el backend identificó el duplicado y existió una sola resolución en el historial.",
-      "status": "pass"
+      "id": "post_without_idempotency_key_rejected",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/public/week-09.test.ts course-tests/retry-policy.test.ts",
+      "evidence": "planRetry({ method: 'POST', status: 503, attempt: 1 }) devolvió { retry: false, delayMs: 0, requiresStableIdempotencyKey: true }, impidiendo repetir mutaciones sin clave estable."
     },
     {
-      "id": "telemetry_redaction",
-      "type": "security",
-      "expected": "La telemetría no debe contener tokens, actorId, technicianId ni coordenadas.",
-      "observed": "Los campos sensibles fueron eliminados o sustituidos antes de registrar la telemetría.",
-      "status": "pass"
+      "id": "telemetry_redaction_on_retries",
+      "status": "pass",
+      "scenarioType": "boundary",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "evidence": "La telemetría generada por executeWithRetry y redactForTelemetry ocultó actorId ('technician-1'), tokens y coordenadas, conservando únicamente incidentId, correlationId, status, attempt y durationMs."
     }
   ]
 }
