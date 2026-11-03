@@ -1,36 +1,58 @@
 {
-    "schemaVersion": 1,
-    "week": 9,
-    "teamId": "equipo-9",
-    "members": [
-      {
-        "studentId": "Alexis",
-        "commitShas": [
-          "088cabd1f78779e279edc4b3915ae8bc6e14fc36"
-        ],
-        "files": [
-          "App.tsx",
-          "course-tests/location-resilience.test.ts",
-          "course-tests/resolve-incident-location.test.ts",
-          "src/application/location/resolve-incident-location.usecase.ts",
-          "src/course-evaluation/index.ts",
-          "src/domain/location/geocoding.port.ts",
-          "src/domain/location/select-incident-location.ts",
-          "src/infrastructure/location/cached-geocoding.service.ts",
-          "src/ui/screens/IncidentListScreen.tsx",
-          "docs/resilience-policy.md"
-        ],
-        "tests": [
-          "npm run typecheck: PASS",
-          "course-tests/location-resilience.test.ts: pruebas de selección de ubicación, caché, TTL, respuestas incompletas, coordenadas inválidas, HTTP 429 y timeout.",
-          "course-tests/resolve-incident-location.test.ts: 7 pruebas de resolución de ubicación, reintentos y alternativa manual.",
-          "Regresión combinada: 5 suites y 36 pruebas aprobadas."
-        ],
-        "reviews": [],
-        "prediction": "Una consulta válida al proveedor debe devolver una etiqueta y coordenadas dentro de los rangos permitidos. Las consultas repetidas deben reutilizar resultados válidos mientras la caché no expire. Los fallos transitorios deben respetar los reintentos acotados y, cuando no se pueda resolver la ubicación, debe conservarse una alternativa manual sin inventar coordenadas.",
-        "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts course-tests/incident-list-screen.test.tsx course-tests/smoke.test.tsx",
-        "observedResult": "PASS: 5 suites y 36 pruebas aprobadas en 4.925 segundos. npm run typecheck también terminó correctamente.",
-        "explanation": "Implementé la selección y validación de ubicaciones, el contrato de geocodificación, el adaptador HTTP con caché en memoria y expiración TTL, la integración del caso de uso con reintentos y alternativa manual, los cambios necesarios en la interfaz y las pruebas correspondientes. También completé la documentación asignada en docs/resilience-policy.md. La ubicación manual conserva una etiqueta proporcionada por el usuario y no genera coordenadas ficticias. La implementación contó con apoyo de ChatGPT y los resultados corresponden a pruebas ejecutadas localmente."
-      }
-    ]
-  }
+  "schemaVersion": 1,
+  "week": 9,
+  "teamId": "equipo-9",
+  "members": [
+    {
+      "studentId": "Alexis",
+      "commitShas": ["088cabd1f78779e279edc4b3915ae8bc6e14fc36"],
+      "files": [
+        "App.tsx",
+        "course-tests/location-resilience.test.ts",
+        "course-tests/resolve-incident-location.test.ts",
+        "src/application/location/resolve-incident-location.usecase.ts",
+        "src/course-evaluation/index.ts",
+        "src/domain/location/geocoding.port.ts",
+        "src/domain/location/select-incident-location.ts",
+        "src/infrastructure/location/cached-geocoding.service.ts",
+        "src/ui/screens/IncidentListScreen.tsx",
+        "docs/resilience-policy.md"
+      ],
+      "tests": [
+        "npm run typecheck: PASS",
+        "course-tests/location-resilience.test.ts: pruebas de selección de ubicación, caché, TTL, respuestas incompletas, coordenadas inválidas, HTTP 429 y timeout.",
+        "course-tests/resolve-incident-location.test.ts: 7 pruebas de resolución de ubicación, reintentos y alternativa manual.",
+        "Regresión combinada: 5 suites y 36 pruebas aprobadas."
+      ],
+      "reviews": [],
+      "prediction": "Una consulta válida al proveedor debe devolver una etiqueta y coordenadas dentro de los rangos permitidos. Las consultas repetidas deben reutilizar resultados válidos mientras la caché no expire. Los fallos transitorios deben respetar los reintentos acotados y, cuando no se pueda resolver la ubicación, debe conservarse una alternativa manual sin inventar coordenadas.",
+      "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts course-tests/incident-list-screen.test.tsx course-tests/smoke.test.tsx",
+      "observedResult": "PASS: 5 suites y 36 pruebas aprobadas en 4.925 segundos. npm run typecheck también terminó correctamente.",
+      "explanation": "Implementé la selección y validación de ubicaciones, el contrato de geocodificación, el adaptador HTTP con caché en memoria y expiración TTL, la integración del caso de uso con reintentos y alternativa manual, los cambios necesarios en la interfaz y las pruebas correspondientes. También completé la documentación asignada en docs/resilience-policy.md. La ubicación manual conserva una etiqueta proporcionada por el usuario y no genera coordenadas ficticias. La implementación contó con apoyo de ChatGPT y los resultados corresponden a pruebas ejecutadas localmente."
+    },
+
+    {
+      "studentId": "Pacheco",
+      "commitShas": ["31a1d18836c846b6b27c6895792a4f448469d58b"],
+      "files": [
+        "course-tests/resilience-fault-injection.test.ts",
+        "src/course-evaluation/index.ts",
+        "reports/week-09/fault-injection.json",
+        "reports/week-09/retry-metrics.json"
+      ],
+      "tests": [
+        "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts — PASS: 10 pruebas",
+        "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts course-tests/retry-policy.test.ts course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts — PASS: 5 suites y 49 pruebas",
+        "npm.cmd test -- --ci --runInBand course-tests/public/week-04.test.ts course-tests/week-04-negative.test.ts — PASS: 2 suites y 6 pruebas",
+        "npm.cmd run typecheck — PASS"
+      ],
+      "reviews": [
+        "Se detectó y corrigió una filtración de actorId en la telemetría durante la prueba timeout_after_commit."
+      ],
+      "prediction": "Los fallos transitorios deben producir reintentos acotados, respetar Retry-After o backoff, mantener una clave de idempotencia estable y degradar a una alternativa manual sin duplicar operaciones ni filtrar datos sensibles.",
+      "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "observedResult": "PASS: 1 suite y 10 pruebas aprobadas. La verificación conjunta terminó con 5 suites y 49 pruebas aprobadas.",
+      "explanation": "Implementé pruebas de extremo a extremo contra el backend local para geocodificación, caché, respuestas incompletas, coordenadas inválidas, HTTP 429, HTTP 500, respuestas malformadas, timeout y timeout posterior al commit. Verifiqué reintentos limitados, Retry-After, backoff, idempotencia y ausencia de duplicados. La prueba también detectó una filtración de actorId, por lo que actualicé la sanitización de telemetría y confirmé que las pruebas de privacidad anteriores continúan aprobando."
+    }
+  ]
+}
