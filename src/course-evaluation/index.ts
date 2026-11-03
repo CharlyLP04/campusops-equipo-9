@@ -29,6 +29,7 @@ export function redactForTelemetry(input: unknown): unknown {
     'displayname',
     'name',
     'userid',
+    'actorid',
     'reporterid',
     'technicianid',
     'assignedtechnicianid',

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "31a1d18836c846b6b27c6895792a4f448469d58b",
+  "generatedAt": "2026-11-03T04:43:17Z",
+  "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+  "status": "pass",
+  "summary": {
+    "testSuitesPassed": 1,
+    "testsPassed": 10,
+    "testsFailed": 0,
+    "usesLocalBackend": true,
+    "publicInternetRequired": false,
+    "sensitiveTelemetryDetected": false
+  },
+  "scenarios": [
+    {
+      "id": "geocoding_cache",
+      "type": "nominal",
+      "expected": "La primera consulta usa el backend y la segunda reutiliza la caché.",
+      "observed": "La ubicación se resolvió correctamente y la segunda consulta no produjo otra llamada de red.",
+      "status": "pass"
+    },
+    {
+      "id": "incomplete_payload",
+      "type": "failure",
+      "expected": "Un resultado incompleto debe rechazarse y conservar la ubicación manual.",
+      "observed": "La aplicación degradó limpiamente a ubicación manual.",
+      "status": "pass"
+    },
+    {
+      "id": "invalid_coordinates",
+      "type": "boundary",
+      "expected": "Las coordenadas fuera de rango deben rechazarse.",
+      "observed": "Las coordenadas inválidas no ingresaron al dominio y se utilizó la alternativa manual.",
+      "status": "pass"
+    },
+    {
+      "id": "rate_limited",
+      "type": "failure",
+      "expected": "HTTP 429 debe respetar Retry-After y detenerse después del intento permitido.",
+      "observed": "Se realizaron cuatro intentos como máximo y después se utilizó la ubicación manual.",
+      "status": "pass"
+    },
+    {
+      "id": "server_error",
+      "type": "failure",
+      "expected": "HTTP 500 debe usar backoff acotado y no generar un ciclo infinito.",
+      "observed": "Los reintentos se detuvieron en el intento cuatro y el flujo continuó con ubicación manual.",
+      "status": "pass"
+    },
+    {
+      "id": "malformed_response",
+      "type": "failure",
+      "expected": "Una respuesta malformada debe rechazarse sin romper la interfaz.",
+      "observed": "El contrato inválido fue rechazado y se conservó la alternativa manual.",
+      "status": "pass"
+    },
+    {
+      "id": "slow_response",
+      "type": "failure",
+      "expected": "Una respuesta lenta debe terminar mediante timeout controlado.",
+      "observed": "El timeout fue controlado y la ubicación manual permaneció disponible.",
+      "status": "pass"
+    },
+    {
+      "id": "timeout_after_commit",
+      "type": "failure",
+      "expected": "El reintento debe conservar la misma clave de idempotencia y no duplicar el historial.",
+      "observed": "El segundo intento reutilizó la clave, el backend identificó el duplicado y existió una sola resolución en el historial.",
+      "status": "pass"
+    },
+    {
+      "id": "telemetry_redaction",
+      "type": "security",
+      "expected": "La telemetría no debe contener tokens, actorId, technicianId ni coordenadas.",
+      "observed": "Los campos sensibles fueron eliminados o sustituidos antes de registrar la telemetría.",
+      "status": "pass"
+    }
+  ]
+}

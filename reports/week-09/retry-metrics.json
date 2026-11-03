@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "commitSha": "31a1d18836c846b6b27c6895792a4f448469d58b",
+  "generatedAt": "REEMPLAZAR_FECHA",
+  "status": "pass",
+  "metrics": [
+    {
+      "scenario": "rate_limited_429",
+      "attempts": 4,
+      "retryDelaysMs": [1000, 1000, 1000],
+      "retryAfterRespected": true,
+      "infiniteLoopDetected": false,
+      "finalResult": "manual_fallback"
+    },
+    {
+      "scenario": "server_error_500",
+      "attempts": 4,
+      "retryDelaysMs": [200, 400, 800],
+      "backoffApplied": true,
+      "infiniteLoopDetected": false,
+      "finalResult": "manual_fallback"
+    },
+    {
+      "scenario": "timeout_after_commit",
+      "attempts": 2,
+      "stableIdempotencyKey": true,
+      "duplicateHistoryEntries": 0,
+      "finalHttpStatus": 200,
+      "finalResult": "success"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "result": "PASS: 1 suite y 10 pruebas aprobadas."
+    },
+    {
+      "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts course-tests/retry-policy.test.ts course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts",
+      "result": "PASS: 5 suites y 49 pruebas aprobadas."
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS: TypeScript terminó sin errores."
+    }
+  ]
+}
