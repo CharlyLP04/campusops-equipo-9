@@ -8,6 +8,8 @@ Este documento describe cómo **CampusOps** integra el servicio de geocodificaci
 
 ### 1.1 Proveedor y adaptador HTTP
 - **Endpoint del contrato y doble controlado:** `GET /v1/geocoding?q=<consulta>` expuesto por el backend didáctico (`course-backend/server.mjs` y `course-backend/campusops.mjs`).
+- **Integración desde la aplicación:** El adaptador `src/infrastructure/location/cached-geocoding.service.ts` realiza la consulta al endpoint y obtiene las credenciales mediante el proveedor de credenciales de sesión. Envía el encabezado `Authorization: Bearer` y el identificador de actor `X-Course-Actor`. El encabezado `X-Course-Scenario` se utiliza cuando se configura un escenario controlado de prueba.
+- **Tiempo límite:** La consulta tiene un timeout predeterminado de `3000 ms`, configurable mediante `timeoutMs`. Si se supera, la solicitud se aborta y se informa el fallo para aplicar la alternativa correspondiente.
 - **Formato esperado de respuesta válida:** `{ label: string, latitude: number, longitude: number }` con etiqueta no vacía y coordenadas numéricas finitas dentro de `latitude ∈ [-90, 90]` y `longitude ∈ [-180, 180]`.
 - **Restricciones operativas y de privacidad:**
   - En producción y en el entorno del curso no se incrustan llaves privadas ni tokens facturables en el cliente (`EXPO_PUBLIC_*`).
@@ -16,8 +18,9 @@ Este documento describe cómo **CampusOps** integra el servicio de geocodificaci
 
 ### 1.2 Caché de geocodificación
 - **Propósito:** Reducir llamadas repetidas al proveedor externo, respetar cuotas y responder de inmediato ante consultas de edificios o zonas ya resueltas en el campus.
-- **Clave normalizada:** `query.trim().toLowerCase()`.
-- **Estructura y vigencia (TTL):** Cada entrada almacena `{ label, latitude, longitude, cachedAt, expiresAt }`. Sólo se almacenan en caché respuestas que superaron la validación estricta de `selectIncidentLocation` (`source === 'provider'`). Las respuestas de error, incompletas o manuales nunca contaminan el caché.
+- **Clave normalizada:** `query.trim().toLowerCase().replace(/\s+/g, ' ')`. Esto permite reutilizar una misma entrada aunque la consulta contenga diferencias de mayúsculas o espacios repetidos.
+- **Estructura y vigencia (TTL):** Cada entrada almacena `{ label, latitude, longitude, cachedAt, expiresAt }`. El TTL predeterminado es de **5 minutos (`300000 ms`)**, configurable mediante `cacheTtlMs`. Una entrada vencida no debe utilizarse y debe consultarse nuevamente al proveedor.
+- **Criterio de almacenamiento:** Sólo se almacenan respuestas válidas del proveedor que superaron la validación de `selectIncidentLocation` (`source === 'provider'`). Las respuestas de error, incompletas o manuales nunca contaminan el caché.
 
 ---
 
@@ -34,6 +37,7 @@ Implementada en `src/domain/location/select-incident-location.ts` y expuesta en 
 | Coordenadas fuera de rango o no finitas (`latitude: 91`, `latitude: 999`, `longitude: null`, `NaN`) | `{ source: 'manual', label: manualLabel }` | **Nunca** |
 
 Cuando el proveedor falla o tarda demasiado, el usuario en **CampusOps** puede escribir o conservar manualmente el edificio, laboratorio, zona o referencia (por ejemplo, `"Edificio manual"` o `"Edificio Central"`), manteniendo operativo el registro y la atención de incidencias.
+Si el usuario no proporciona una referencia manual válida, la función utiliza la etiqueta genérica `Ubicación manual`. En ningún caso se calculan, generan o asignan coordenadas para completar una ubicación manual.
 
 ---
 
@@ -77,7 +81,7 @@ Implementada en `src/domain/resilience/plan-retry.ts`, integrada en `src/applica
 
 ### 4.2 Cuándo reintentar, cuándo usar la alternativa y cuándo informar fallo
 - **Reintentar automáticamente:** Sólo ante fallos transitorios (`timeout`, `429`, `5xx`) mientras `attempt < 4` y, si es `POST`, únicamente con `Idempotency-Key` estable.
-- **Usar la alternativa (fallback):** En geocodificación (`GET /v1/geocoding`), si el caché no tiene el dato y el proveedor devuelve datos incompletos, coordenadas inválidas, `429`, `500` o `timeout`, no se bloquea al usuario: `selectIncidentLocation` cae de inmediato a `{ source: 'manual', label: manualLabel }` sin inventar coordenadas.
+- **Usar la alternativa (fallback):** En geocodificación (`GET /v1/geocoding`), las respuestas incompletas, malformadas o con coordenadas inválidas pasan a la alternativa manual sin reintentos. Ante fallos transitorios como `429`, `500`, `5xx` o `timeout`, el caso de uso aplica reintentos acotados mediante `planRetry`, respeta `Retry-After` cuando está disponible y utiliza la alternativa manual cuando se agotan los intentos o el proveedor continúa sin estar disponible. La ubicación manual conserva únicamente la etiqueta escrita por el usuario, sin inventar coordenadas.
 - **Informar fallo o conflicto sin reintentar ciegamente:**
   - Cuando se alcanza el intento 4 sin éxito (`max_retries_exceeded`), la operación permanece resguardada en la cola local o informa el error en la UI para reintento manual posterior.
   - Cuando el servidor responde `409 Conflict`, `403 Forbidden` o `422 Unprocessable Entity`, se detienen los reintentos de inmediato y se delega a la política de conflictos de Semana 8.

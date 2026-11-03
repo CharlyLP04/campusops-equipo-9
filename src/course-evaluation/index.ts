@@ -11,7 +11,9 @@ import { SessionCoordinator } from '../domain/auth/session-coordinator';
 import { resolveSync as resolveSyncDomain } from '../domain/sync/resolve-sync';
 import { deduplicateOperations as deduplicateOperationsDomain } from '../domain/sync/deduplicate-operations';
 import { planRetry as planRetryDomain } from '../domain/resilience/plan-retry';
-
+import {
+  selectIncidentLocation as selectIncidentLocationDomain,
+} from '../domain/location/select-incident-location';
 function pending(name: string): never {
   throw new Error(`${name} must be implemented in the assigned week`);
 }
@@ -168,7 +170,10 @@ export function reducePermissionLifecycle(
   return pending('reducePermissionLifecycle');
 }
 
-/** Week 09: see docs/CAMPUSOPS_API.md; this is not a completed solution. */
-export function selectIncidentLocation(_provider: unknown, _manualLabel: string): IncidentLocation {
-  return pending('selectIncidentLocation');
+/** Week 09: selecciona una ubicación del proveedor o utiliza el fallback manual. */
+export function selectIncidentLocation(
+  provider: unknown,
+  manualLabel: string,
+): IncidentLocation {
+  return selectIncidentLocationDomain(provider, manualLabel);
 }

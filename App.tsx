@@ -25,6 +25,8 @@ import { SqliteOfflineQueue } from './src/infrastructure/sync/sqlite-offline-que
 
 import { IncidentListScreen } from './src/ui/screens/IncidentListScreen';
 import { IncidentDetailScreen } from './src/ui/screens/IncidentDetailScreen';
+import { createResolveIncidentLocationUseCase } from './src/application/location/resolve-incident-location.usecase';
+import { CachedGeocodingService } from './src/infrastructure/location/cached-geocoding.service';
 
 const isTestEnvironment =
   process.env.NODE_ENV === 'test' ||
@@ -67,6 +69,15 @@ const createIncidentUseCase = new CreateIncidentUseCase(
   repository,
   sessionIdentity,
 );
+const geocodingService = new CachedGeocodingService({
+  credentialsProvider: () =>
+    sessionAuthService.getRequestCredentials(),
+});
+
+const resolveIncidentLocationUseCase =
+  createResolveIncidentLocationUseCase({
+    geocoding: geocodingService,
+  });
 const offlineQueue = isTestEnvironment ? null : new SqliteOfflineQueue();
 const queueSummaryUseCase = offlineQueue
   ? new GetOfflineQueueSummaryUseCase(offlineQueue)
@@ -401,6 +412,7 @@ export default function App() {
             <IncidentListScreen
               getIncidentsUseCase={getIncidentsUseCase}
               createIncidentUseCase={createIncidentUseCase}
+              resolveIncidentLocationUseCase={resolveIncidentLocationUseCase}
               onSelectIncident={(id) => setSelectedIncidentId(id)}
             />
           ) : (
