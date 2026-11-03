@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "week": 9,
-  "commitSha": "1ac9acab32fa1a151d9f5ef485a8a44ef5f31ca6",
+  "commitSha": "30cf2301aedd9a628ad9ad094c182b4c131b57c1",
   "decision": "Adoptar una arquitectura de integración resiliente en tres niveles: (1) un planificador puro de reintentos (planRetry) que exige Idempotency-Key estable de al menos 8 caracteres en todo POST, respeta Retry-After, aplica backoff exponencial finito (200 ms, 400 ms, 800 ms) y corta estrictamente en el intento 4; (2) un adaptador HTTP de geocodificación con caché en memoria con TTL de 5 minutos y validación de dominio (selectIncidentLocation) que degrada a ubicación manual sin inventar coordenadas ante datos incompletos, coordenadas fuera de rango, 429, 500 o timeout; y (3) un corredor de mutaciones (executeWithRetry + HttpSyncRemote.submitWithRetry) que recupera respuestas perdidas tras commit (timeout_after_commit) reutilizando la misma clave de operación sin duplicar efectos y sanitizando la telemetría con redactForTelemetry.",
   "alternatives": [
     "Reintentar indefinidamente todas las solicitudes fallidas con un intervalo fijo sin exigir Idempotency-Key ni distinguir errores 4xx de fallos transitorios 429/5xx/timeout.",
