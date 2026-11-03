@@ -4,8 +4,36 @@
   "teamId": "equipo-9",
   "members": [
     {
+      "studentId": "Carlos",
+      "commitShas": [
+        "11f6639e0696ad8f576a8acedbc2e342a17c5b29"
+      ],
+      "files": [
+        "src/domain/resilience/plan-retry.ts",
+        "src/application/resilience/resilient-operation-runner.ts",
+        "src/infrastructure/sync/http-sync-remote.ts",
+        "src/course-evaluation/index.ts",
+        "docs/resilience-policy.md",
+        "course-tests/retry-policy.test.ts"
+      ],
+      "tests": [
+        "course-tests/retry-policy.test.ts",
+        "course-tests/public/week-09.test.ts"
+      ],
+      "reviews": [
+        "PR #42: implementación de planRetry, executeWithRetry y submitWithRetry con idempotencia y telemetría sanitizada",
+        "PR #43 y PR #44: revisión e integración de geocodificación con caché e inyección de fallas en main"
+      ],
+      "prediction": "planRetry permitirá reintentar fallos transitorios (timeout, 429, 5xx) en los intentos 1 a 3 respetando Retry-After o backoff exponencial (200, 400, 800 ms), cortará en el intento 4 y rechazará cualquier POST sin idempotencyKey estable.",
+      "command": "npm test -- --ci --runInBand course-tests/retry-policy.test.ts course-tests/public/week-09.test.ts",
+      "observedResult": "PASS course-tests/retry-policy.test.ts y PASS course-tests/public/week-09.test.ts (14 pruebas aprobadas en total, 0 fallos).",
+      "explanation": "Implementé el planificador de reintentos planRetry en src/domain/resilience/plan-retry.ts, el corredor executeWithRetry en src/application/resilience/resilient-operation-runner.ts con métricas sanitizadas mediante redactForTelemetry y el método submitWithRetry en HttpSyncRemote para recuperar respuestas perdidas conservando la misma Idempotency-Key."
+    },
+    {
       "studentId": "Alexis",
-      "commitShas": ["088cabd1f78779e279edc4b3915ae8bc6e14fc36"],
+      "commitShas": [
+        "088cabd1f78779e279edc4b3915ae8bc6e14fc36"
+      ],
       "files": [
         "App.tsx",
         "course-tests/location-resilience.test.ts",
@@ -19,21 +47,22 @@
         "docs/resilience-policy.md"
       ],
       "tests": [
-        "npm run typecheck: PASS",
-        "course-tests/location-resilience.test.ts: pruebas de selección de ubicación, caché, TTL, respuestas incompletas, coordenadas inválidas, HTTP 429 y timeout.",
-        "course-tests/resolve-incident-location.test.ts: 7 pruebas de resolución de ubicación, reintentos y alternativa manual.",
-        "Regresión combinada: 5 suites y 36 pruebas aprobadas."
+        "course-tests/location-resilience.test.ts",
+        "course-tests/resolve-incident-location.test.ts"
       ],
-      "reviews": [],
-      "prediction": "Una consulta válida al proveedor debe devolver una etiqueta y coordenadas dentro de los rangos permitidos. Las consultas repetidas deben reutilizar resultados válidos mientras la caché no expire. Los fallos transitorios deben respetar los reintentos acotados y, cuando no se pueda resolver la ubicación, debe conservarse una alternativa manual sin inventar coordenadas.",
-      "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts course-tests/incident-list-screen.test.tsx course-tests/smoke.test.tsx",
-      "observedResult": "PASS: 5 suites y 36 pruebas aprobadas en 4.925 segundos. npm run typecheck también terminó correctamente.",
-      "explanation": "Implementé la selección y validación de ubicaciones, el contrato de geocodificación, el adaptador HTTP con caché en memoria y expiración TTL, la integración del caso de uso con reintentos y alternativa manual, los cambios necesarios en la interfaz y las pruebas correspondientes. También completé la documentación asignada en docs/resilience-policy.md. La ubicación manual conserva una etiqueta proporcionada por el usuario y no genera coordenadas ficticias. La implementación contó con apoyo de ChatGPT y los resultados corresponden a pruebas ejecutadas localmente."
+      "reviews": [
+        "PR #43: implementación de selectIncidentLocation, CachedGeocodingService con TTL y fallback manual en UI"
+      ],
+      "prediction": "Una consulta válida al proveedor debe devolver etiqueta y coordenadas dentro de [-90, 90] y [-180, 180], reutilizar la caché antes de que expire el TTL y degradar a ubicación manual sin inventar coordenadas cuando el proveedor falle.",
+      "command": "npm test -- --ci --runInBand course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts",
+      "observedResult": "PASS en las 3 suites (29 pruebas aprobadas) y npm run typecheck sin errores.",
+      "explanation": "Implementé selectIncidentLocation en src/domain/location/select-incident-location.ts, el puerto y adaptador HTTP CachedGeocodingService con caché en memoria y timeout por AbortController, el caso de uso ResolveIncidentLocationUseCase y la captura de ubicación con fallback manual en IncidentListScreen.tsx."
     },
-
     {
       "studentId": "Pacheco",
-      "commitShas": ["31a1d18836c846b6b27c6895792a4f448469d58b"],
+      "commitShas": [
+        "31a1d18836c846b6b27c6895792a4f448469d58b"
+      ],
       "files": [
         "course-tests/resilience-fault-injection.test.ts",
         "src/course-evaluation/index.ts",
@@ -41,18 +70,15 @@
         "reports/week-09/retry-metrics.json"
       ],
       "tests": [
-        "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts — PASS: 10 pruebas",
-        "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts course-tests/retry-policy.test.ts course-tests/location-resilience.test.ts course-tests/resolve-incident-location.test.ts course-tests/public/week-09.test.ts — PASS: 5 suites y 49 pruebas",
-        "npm.cmd test -- --ci --runInBand course-tests/public/week-04.test.ts course-tests/week-04-negative.test.ts — PASS: 2 suites y 6 pruebas",
-        "npm.cmd run typecheck — PASS"
+        "course-tests/resilience-fault-injection.test.ts"
       ],
       "reviews": [
-        "Se detectó y corrigió una filtración de actorId en la telemetría durante la prueba timeout_after_commit."
+        "PR #44: validación de inyección de fallas contra course-backend y sanitización de actorId en redactForTelemetry"
       ],
-      "prediction": "Los fallos transitorios deben producir reintentos acotados, respetar Retry-After o backoff, mantener una clave de idempotencia estable y degradar a una alternativa manual sin duplicar operaciones ni filtrar datos sensibles.",
-      "command": "npm.cmd test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
-      "observedResult": "PASS: 1 suite y 10 pruebas aprobadas. La verificación conjunta terminó con 5 suites y 49 pruebas aprobadas.",
-      "explanation": "Implementé pruebas de extremo a extremo contra el backend local para geocodificación, caché, respuestas incompletas, coordenadas inválidas, HTTP 429, HTTP 500, respuestas malformadas, timeout y timeout posterior al commit. Verifiqué reintentos limitados, Retry-After, backoff, idempotencia y ausencia de duplicados. La prueba también detectó una filtración de actorId, por lo que actualicé la sanitización de telemetría y confirmé que las pruebas de privacidad anteriores continúan aprobando."
+      "prediction": "Los escenarios de falla en geocodificación y escritura (incomplete, invalid_coordinates, 429, 500, malformed, slow y timeout_after_commit) respetarán el límite de 4 intentos y recuperarán la resolución perdida sin duplicar entradas en history.",
+      "command": "npm test -- --ci --runInBand course-tests/resilience-fault-injection.test.ts",
+      "observedResult": "PASS course-tests/resilience-fault-injection.test.ts (1 suite y 10 pruebas aprobadas contra el servidor local real).",
+      "explanation": "Implementé las pruebas de integración de inyección de fallas en course-tests/resilience-fault-injection.test.ts contra course-backend/server.mjs, verificando hit de caché, respeto a Retry-After en 429, backoff en 500, recuperación de respuesta perdida en timeout_after_commit con duplicate: true y sanitización de actorId en redactForTelemetry."
     }
   ]
 }
